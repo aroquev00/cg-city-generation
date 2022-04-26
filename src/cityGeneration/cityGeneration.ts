@@ -130,7 +130,7 @@ class City {
   }
 }
 
-let city = new City(10);
+let city = new City(20);
 
 function printCity(city: City) {
   for (let row of city.map) {
