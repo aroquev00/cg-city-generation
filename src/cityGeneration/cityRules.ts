@@ -13,7 +13,8 @@ class RoadRule {
 export class RoadRuleSystem {
   public rules: RoadRule[];
 
-  constructor() {
+  constructor(type: string) {
+    
     this.rules = [];
     this.rules.push(new RoadRule("CS", 0.8));
     this.rules.push(new RoadRule("TL", 0.1));

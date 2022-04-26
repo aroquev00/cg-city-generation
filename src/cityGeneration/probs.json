@@ -1,0 +1,19 @@
+[
+  {
+    "title": "Downtown",
+    "rules": [
+      {
+        "rule": "CS",
+        "probability": 0.8
+      },
+      {
+        "rule": "TR",
+        "probability": 0.1
+      },
+      {
+        "rule": "TL",
+        "probability": 0.1
+      }
+    ]
+  }
+]

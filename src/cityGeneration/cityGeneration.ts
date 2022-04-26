@@ -1,6 +1,6 @@
 import { RoadRuleSystem } from "./cityRules";
 
-let rules = new RoadRuleSystem();
+let rules = new RoadRuleSystem("Downtown");
 
 class RoadBuilder {
   public direction: string;
@@ -22,7 +22,7 @@ class CityNode {
   }
 }
 
-class City {
+export class City {
   public map: CityNode[][];
   public size: number;
 
@@ -42,8 +42,6 @@ class City {
   createRoadsDriver() {
     // Starting road
     let builder = new RoadBuilder(Math.floor(this.size / 2), this.size - 1,"N");
-
-    
     
     this.createRoad(builder);
   }
@@ -128,21 +126,15 @@ class City {
   isOutOfBounds(builder: RoadBuilder) {
     return builder.x < 0 || builder.x >= this.size || builder.y < 0 || builder.y >= this.size;
   }
-}
 
-let city = new City(20);
-
-function printCity(city: City) {
-  for (let row of city.map) {
-    let s = "|";
-    for (let node of row) {
-      s += node.type;
+  printCity() {
+    for (let row of this.map) {
+      let s = "|";
+      for (let node of row) {
+        s += node.type;
+      }
+      s += "|"
+      console.log(s);
     }
-    s += "|"
-    console.log(s);
   }
 }
-
-
-
-printCity(city);
