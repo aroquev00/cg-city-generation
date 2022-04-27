@@ -35,7 +35,16 @@ export class RoadRuleSystem {
 
   getBranchOutRule() {
     const prob = Math.random();
-    if (prob > 0.9) {
+    if (prob > 0.82) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  getCrossingRule() {
+    const prob = Math.random();
+    if (prob > 0.5) {
       return true;
     } else {
       return false;

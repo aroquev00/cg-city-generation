@@ -57,7 +57,7 @@ export class City {
     // Build loop.
     while (this.queue.length > 0) {
       let builder: RoadBuilder = this.queue.shift()!;
-      if (! this.isValidRoadPosition(builder)) {
+      if (!this.isValidRoadPosition(builder)) {
         continue;
       }
       this.map[builder.x][builder.y].type = GroundType.Street;
@@ -196,7 +196,7 @@ export class City {
     }
   }
 
-  isValidRoadPosition(builder: RoadBuilder) {
+  isValidRoadPosition(builder: RoadBuilder): boolean {
     // First check if road builder is within bounds.
     if (
       builder.x < 0 ||
@@ -207,8 +207,128 @@ export class City {
       return false;
     }
 
+    // Check if we have reached intersection.
     if (this.map[builder.x][builder.y].type === GroundType.Street) {
+      // Check if we want to go across the street and create an intersection.
+      if (rules.getCrossingRule()) {
+        switch (builder.direction) {
+          case Direction.North:
+            if (
+              this.map[builder.x][builder.y + 1] !== undefined &&
+              this.map[builder.x][builder.y + 1].type === GroundType.Block
+            ) {
+              builder.y += 1;
+              return this.isValidRoadPosition(builder);
+            }
+            break;
+          case Direction.South:
+            if (
+              this.map[builder.x][builder.y - 1] !== undefined &&
+              this.map[builder.x][builder.y - 1].type === GroundType.Block
+            ) {
+              builder.y -= 1;
+              return this.isValidRoadPosition(builder);
+            }
+            break;
+          case Direction.East:
+            if (
+              this.map[builder.x + 1] !== undefined &&
+              this.map[builder.x + 1][builder.y].type === GroundType.Block
+            ) {
+              builder.x += 1;
+              return this.isValidRoadPosition(builder);
+            }
+            break;
+          case Direction.West:
+            if (
+              this.map[builder.x - 1] !== undefined &&
+              this.map[builder.x - 1][builder.y].type === GroundType.Block
+            ) {
+              builder.x -= 1;
+              return this.isValidRoadPosition(builder);
+            }
+            break;
+        }
+      }
       return false;
+    }
+
+    // TODO: No dead ends.
+
+    // Check if no streets bounding new position, except special cases.
+    switch (builder.direction) {
+      case Direction.North:
+        if (
+          this.map[builder.x + 1] !== undefined &&
+          this.map[builder.x + 1][builder.y].type === GroundType.Street
+        ) {
+          if (this.map[builder.x + 1][builder.y - 1].type === GroundType.Street) {
+            return false;
+          }
+        }
+        if (
+          this.map[builder.x - 1] !== undefined &&
+          this.map[builder.x - 1][builder.y].type === GroundType.Street
+        ) {
+          if (this.map[builder.x - 1][builder.y - 1].type === GroundType.Street) {
+            return false;
+          }
+        }
+        break;
+      case Direction.South:
+        if (
+          this.map[builder.x + 1] !== undefined &&
+          this.map[builder.x + 1][builder.y].type === GroundType.Street
+        ) {
+          if (this.map[builder.x + 1][builder.y + 1].type === GroundType.Street) {
+            return false;
+          }
+        }
+        if (
+          this.map[builder.x - 1] !== undefined &&
+          this.map[builder.x - 1][builder.y].type === GroundType.Street
+        ) {
+          if (this.map[builder.x - 1][builder.y + 1].type === GroundType.Street) {
+            return false;
+          }
+        }
+        break;
+      case Direction.East:
+        if (
+          this.map[builder.x][builder.y + 1] !== undefined &&
+          this.map[builder.x][builder.y + 1].type === GroundType.Street
+        ) {
+          if (this.map[builder.x - 1][builder.y + 1].type === GroundType.Street) {
+            return false;
+          }
+        }
+        if (
+          this.map[builder.x][builder.y - 1] !== undefined &&
+          this.map[builder.x][builder.y - 1].type === GroundType.Street
+        ) {
+          if (this.map[builder.x - 1][builder.y - 1].type === GroundType.Street) {
+            return false;
+          }
+        }
+        break;
+      case Direction.West:
+        if (
+          this.map[builder.x][builder.y + 1] !== undefined &&
+          this.map[builder.x][builder.y + 1].type === GroundType.Street
+        ) {
+          if (this.map[builder.x + 1][builder.y + 1].type === GroundType.Street) {
+            return false;
+          }
+        }
+        if (
+          this.map[builder.x][builder.y - 1] !== undefined &&
+          this.map[builder.x][builder.y - 1].type === GroundType.Street
+        ) {
+          if (this.map[builder.x + 1][builder.y - 1].type === GroundType.Street) {
+            return false;
+          }
+        }
+        break;
     }
 
     return true;
