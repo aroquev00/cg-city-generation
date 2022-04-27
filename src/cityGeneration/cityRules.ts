@@ -35,7 +35,7 @@ export class RoadRuleSystem {
 
   getBranchOutRule() {
     const prob = Math.random();
-    if (prob > 0.95) {
+    if (prob > 0.9) {
       return true;
     } else {
       return false;
