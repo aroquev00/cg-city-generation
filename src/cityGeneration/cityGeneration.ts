@@ -49,26 +49,28 @@ export class City {
     // Starting road
     let builder = new RoadBuilder(
       Math.floor(this.size / 2),
-      this.size - 1,
+      0,
       Direction.North
     );
     this.queue.push(builder);
+
+    // Build loop.
     while (this.queue.length > 0) {
       let builder: RoadBuilder = this.queue.shift()!;
       if (! this.isValidRoadPosition(builder)) {
         continue;
       }
-      this.map[builder.y][builder.x].type = GroundType.Street;
+      this.map[builder.x][builder.y].type = GroundType.Street;
       // choose rule
       const nextAction = rules.getRule();
       switch (nextAction) {
         case "CS":
           switch (builder.direction) {
             case Direction.North:
-              builder.y -= 1;
+              builder.y += 1;
               break;
             case Direction.South:
-              builder.y += 1;
+              builder.y -= 1;
               break;
             case Direction.East:
               builder.x += 1;
@@ -91,11 +93,11 @@ export class City {
               builder.direction = Direction.West;
               break;
             case Direction.East:
-              builder.y += 1;
+              builder.y -= 1;
               builder.direction = Direction.South;
               break;
             case Direction.West:
-              builder.y -= 1;
+              builder.y += 1;
               builder.direction = Direction.North;
               break;
             default:
@@ -113,11 +115,11 @@ export class City {
               builder.direction = Direction.East;
               break;
             case Direction.East:
-              builder.y -= 1;
+              builder.y += 1;
               builder.direction = Direction.North;
               break;
             case Direction.West:
-              builder.y += 1;
+              builder.y -= 1;
               builder.direction = Direction.South;
               break;
             default:
@@ -148,11 +150,11 @@ export class City {
             newBuilder.direction = Direction.East;
             break;
           case Direction.East:
-            newBuilder.y = builder.y - 1;
+            newBuilder.y = builder.y + 1;
             newBuilder.direction = Direction.North;
             break;
           case Direction.West:
-            newBuilder.y = builder.y + 1;
+            newBuilder.y = builder.y - 1;
             newBuilder.direction = Direction.South;
             break;
           default:
@@ -179,11 +181,11 @@ export class City {
             newBuilder.direction = Direction.West;
             break;
           case Direction.East:
-            newBuilder.y = builder.y + 1;
+            newBuilder.y = builder.y - 1;
             newBuilder.direction = Direction.South;
             break;
           case Direction.West:
-            newBuilder.y = builder.y - 1;
+            newBuilder.y = builder.y + 1;
             newBuilder.direction = Direction.North;
             break;
           default:
@@ -205,7 +207,7 @@ export class City {
       return false;
     }
 
-    if (this.map[builder.y][builder.x].type === GroundType.Street) {
+    if (this.map[builder.x][builder.y].type === GroundType.Street) {
       return false;
     }
 
@@ -213,10 +215,10 @@ export class City {
   }
 
   printCity() {
-    for (let row of this.map) {
+    for (let y = this.size - 1; y >= 0; y--) {
       let s = "|";
-      for (let node of row) {
-        s += node.type === GroundType.Street ? "*" : " ";
+      for (let x = 0; x < this.size; x++) {
+        s += this.map[x][y].type === GroundType.Street ? "*" : " ";
       }
       s += "|";
       console.log(s);
