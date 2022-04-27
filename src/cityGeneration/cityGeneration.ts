@@ -120,11 +120,65 @@ export class City {
         throw new Error("Error in rule switch");
         break;
     }
+    // Branch out
+    // First branch out left, if valid
+    if (rules.getBranchOutRule()) {
+      let newBuilder = new RoadBuilder(builder.x, builder.y, builder.direction);
+      switch (builder.direction) {
+        case "N":
+          newBuilder.x = builder.x - 1;
+          newBuilder.direction = "W";
+          break;
+        case "S":
+          newBuilder.x = builder.x + 1;
+          newBuilder.direction = "E";
+          break;
+        case "E":
+          newBuilder.y = builder.y - 1;
+          newBuilder.direction = "N";
+          break;
+        case "W":
+          newBuilder.y = builder.y + 1;
+          newBuilder.direction = "S";
+          break;
+        default:
+          break;
+      }
+      this.createRoad(newBuilder);
+    }
+
+    // Now to branch out right
+    if (rules.getBranchOutRule()) {
+      let newBuilder = new RoadBuilder(builder.x, builder.y, builder.direction);
+      switch (builder.direction) {
+        case "N":
+          newBuilder.x = builder.x + 1;
+          newBuilder.direction = "E";
+          break;
+        case "S":
+          newBuilder.x = builder.x - 1;
+          newBuilder.direction = "W";
+          break;
+        case "E":
+          newBuilder.y = builder.y + 1;
+          newBuilder.direction = "S";
+          break;
+        case "W":
+          newBuilder.y = builder.y - 1;
+          newBuilder.direction = "N";
+          break;
+        default:
+          break;
+      }
+      this.createRoad(newBuilder);
+    }
+
+
     this.createRoad(builder);
   }
 
   isOutOfBounds(builder: RoadBuilder) {
-    return builder.x < 0 || builder.x >= this.size || builder.y < 0 || builder.y >= this.size;
+    return builder.x < 0 || builder.x >= this.size || builder.y < 0 || builder.y >= this.size || this.map[builder.x][builder.y].type === "*";
   }
 
   printCity() {

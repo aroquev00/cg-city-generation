@@ -14,11 +14,12 @@ export class RoadRuleSystem {
   public rules: RoadRule[];
 
   constructor(type: string) {
-    
+
     this.rules = [];
     this.rules.push(new RoadRule("CS", 0.8));
     this.rules.push(new RoadRule("TL", 0.1));
     this.rules.push(new RoadRule("TR", 0.1));
+    // TODO: Add rule for stopping (dead ends?)
   }
 
   getRule() {
@@ -29,6 +30,15 @@ export class RoadRuleSystem {
       if (prob <= accumulatedProb) {
         return rule.action;
       }
+    }
+  }
+
+  getBranchOutRule() {
+    const prob = Math.random();
+    if (prob > 0.95) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
