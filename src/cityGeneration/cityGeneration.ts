@@ -1,13 +1,14 @@
 import { RoadRuleSystem } from "./cityRules";
+import { Direction, GroundType } from "./cityEnums";
 
 let rules = new RoadRuleSystem("Downtown");
 
 class RoadBuilder {
-  public direction: string;
+  public direction: Direction;
   public x: number;
   public y: number;
 
-  constructor(x: number, y: number, direction: string) {
+  constructor(x: number, y: number, direction: Direction) {
     this.x = x;
     this.y = y;
     this.direction = direction;
@@ -15,10 +16,10 @@ class RoadBuilder {
 }
 
 class CityNode {
-  public type: string;
+  public type: GroundType;
 
-  constructor(type?: string) {
-    this.type = type ?? " ";
+  constructor(type: GroundType) {
+    this.type = type;
   }
 }
 
@@ -36,7 +37,7 @@ export class City {
     for (let _row = 0; _row < size; _row++) {
       let tempArr: CityNode[] = [];
       for (let _col = 0; _col < size; _col++) {
-        tempArr.push(new CityNode());
+        tempArr.push(new CityNode(GroundType.Block));
       }
       this.map.push(tempArr);
     }
@@ -48,7 +49,7 @@ export class City {
     let builder = new RoadBuilder(
       Math.floor(this.size / 2),
       this.size - 1,
-      "N"
+      Direction.North
     );
     this.queue.push(builder);
     this.f();
@@ -57,26 +58,25 @@ export class City {
   f() {
     while (this.queue.length > 0) {
       let builder: RoadBuilder = this.queue.shift()!;
-      if (this.isValidRoadPosition(builder)) {
-        // TODO: Change to negation
+      if (! this.isValidRoadPosition(builder)) {
         continue;
       }
-      this.map[builder.y][builder.x].type = "*";
+      this.map[builder.y][builder.x].type = GroundType.Street;
       // choose rule
       const nextAction = rules.getRule();
       switch (nextAction) {
         case "CS":
           switch (builder.direction) {
-            case "N":
+            case Direction.North:
               builder.y -= 1;
               break;
-            case "S":
+            case Direction.South:
               builder.y += 1;
               break;
-            case "E":
+            case Direction.East:
               builder.x += 1;
               break;
-            case "W":
+            case Direction.West:
               builder.x -= 1;
               break;
             default:
@@ -85,21 +85,21 @@ export class City {
           break;
         case "TR":
           switch (builder.direction) {
-            case "N":
+            case Direction.North:
               builder.x += 1;
-              builder.direction = "E";
+              builder.direction = Direction.East;
               break;
-            case "S":
+            case Direction.South:
               builder.x -= 1;
-              builder.direction = "W";
+              builder.direction = Direction.West;
               break;
-            case "E":
+            case Direction.East:
               builder.y += 1;
-              builder.direction = "S";
+              builder.direction = Direction.South;
               break;
-            case "W":
+            case Direction.West:
               builder.y -= 1;
-              builder.direction = "N";
+              builder.direction = Direction.North;
               break;
             default:
               break;
@@ -107,21 +107,21 @@ export class City {
           break;
         case "TL":
           switch (builder.direction) {
-            case "N":
+            case Direction.North:
               builder.x -= 1;
-              builder.direction = "W";
+              builder.direction = Direction.West;
               break;
-            case "S":
+            case Direction.South:
               builder.x += 1;
-              builder.direction = "E";
+              builder.direction = Direction.East;
               break;
-            case "E":
+            case Direction.East:
               builder.y -= 1;
-              builder.direction = "N";
+              builder.direction = Direction.North;
               break;
-            case "W":
+            case Direction.West:
               builder.y += 1;
-              builder.direction = "S";
+              builder.direction = Direction.South;
               break;
             default:
               break;
@@ -142,21 +142,21 @@ export class City {
           builder.direction
         );
         switch (builder.direction) {
-          case "N":
+          case Direction.North:
             newBuilder.x = builder.x - 1;
-            newBuilder.direction = "W";
+            newBuilder.direction = Direction.West;
             break;
-          case "S":
+          case Direction.South:
             newBuilder.x = builder.x + 1;
-            newBuilder.direction = "E";
+            newBuilder.direction = Direction.East;
             break;
-          case "E":
+          case Direction.East:
             newBuilder.y = builder.y - 1;
-            newBuilder.direction = "N";
+            newBuilder.direction = Direction.North;
             break;
-          case "W":
+          case Direction.West:
             newBuilder.y = builder.y + 1;
-            newBuilder.direction = "S";
+            newBuilder.direction = Direction.South;
             break;
           default:
             break;
@@ -173,21 +173,21 @@ export class City {
           builder.direction
         );
         switch (builder.direction) {
-          case "N":
+          case Direction.North:
             newBuilder.x = builder.x + 1;
-            newBuilder.direction = "E";
+            newBuilder.direction = Direction.East;
             break;
-          case "S":
+          case Direction.South:
             newBuilder.x = builder.x - 1;
-            newBuilder.direction = "W";
+            newBuilder.direction = Direction.West;
             break;
-          case "E":
+          case Direction.East:
             newBuilder.y = builder.y + 1;
-            newBuilder.direction = "S";
+            newBuilder.direction = Direction.South;
             break;
-          case "W":
+          case Direction.West:
             newBuilder.y = builder.y - 1;
-            newBuilder.direction = "N";
+            newBuilder.direction = Direction.North;
             break;
           default:
             break;
@@ -198,23 +198,28 @@ export class City {
   }
 
   isValidRoadPosition(builder: RoadBuilder) {
+    // First check if road builder is within bounds.
     if (
       builder.x < 0 ||
       builder.x >= this.size ||
       builder.y < 0 ||
-      builder.y >= this.size ||
-      this.map[builder.y][builder.x].type === "*"
+      builder.y >= this.size
     ) {
-      return true;
+      return false;
+    }
+
+    if (this.map[builder.y][builder.x].type === GroundType.Street) {
+      return false;
     }
     
+    return true;
   }
 
   printCity() {
     for (let row of this.map) {
       let s = "|";
       for (let node of row) {
-        s += node.type;
+        s += node.type === GroundType.Street ? "*" : " ";
       }
       s += "|";
       console.log(s);
