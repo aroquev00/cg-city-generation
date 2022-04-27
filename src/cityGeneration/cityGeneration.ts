@@ -34,6 +34,7 @@ export class City {
 
     this.size = size;
     this.map = [];
+
     for (let _row = 0; _row < size; _row++) {
       let tempArr: CityNode[] = [];
       for (let _col = 0; _col < size; _col++) {
@@ -41,10 +42,10 @@ export class City {
       }
       this.map.push(tempArr);
     }
-    this.createRoadsDriver();
+    this.createRoads();
   }
 
-  createRoadsDriver() {
+  createRoads() {
     // Starting road
     let builder = new RoadBuilder(
       Math.floor(this.size / 2),
@@ -52,10 +53,6 @@ export class City {
       Direction.North
     );
     this.queue.push(builder);
-    this.f();
-  }
-
-  f() {
     while (this.queue.length > 0) {
       let builder: RoadBuilder = this.queue.shift()!;
       if (! this.isValidRoadPosition(builder)) {
@@ -211,7 +208,7 @@ export class City {
     if (this.map[builder.y][builder.x].type === GroundType.Street) {
       return false;
     }
-    
+
     return true;
   }
 
