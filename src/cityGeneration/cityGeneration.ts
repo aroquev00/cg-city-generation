@@ -1,8 +1,6 @@
 import { RoadRuleSystem } from "./cityRules";
 import { Direction, GroundType } from "./cityEnums";
 
-let rules = new RoadRuleSystem("Downtown");
-
 class RoadBuilder {
   public direction: Direction;
   public x: number;
@@ -32,10 +30,15 @@ class CityNode {
 export class City {
   public map: CityNode[][];
   public size: number;
+  public type: string;
+  public rules: RoadRuleSystem;
 
   private queue: RoadBuilder[];
 
-  constructor(size: number) {
+  constructor(size: number, type: string) {
+    this.type = type;
+    this.rules = new RoadRuleSystem(type);
+
     this.queue = [];
 
     this.size = size;
@@ -48,9 +51,11 @@ export class City {
       }
       this.map.push(tempArr);
     }
+
     this.createRoads();
   }
 
+  // Method that procedurally builds roads according to rules.
   createRoads() {
     // Starting road
     this.queue.push(new RoadBuilder(
@@ -68,13 +73,13 @@ export class City {
       let prevBuilderState = new RoadBuilder(builder.x, builder.y, builder.direction);
 
       // choose rule
-      const nextAction = rules.getRule();
+      const nextAction = this.rules.getRule();
       this.applyBuilderRule(builder, nextAction);
       if (!this.isValidRoadPosition(builder)) {
         // Check if there is a no dead end rule
-        if (!rules.allowDeadEnds()) {
+        if (!this.rules.allowDeadEnds()) {
           // Try to apply the other rules
-          let availableActions = rules.getAvailableRules();
+          let availableActions = this.rules.getAvailableRules();
           for (let action of availableActions) {
             builder.copyState(prevBuilderState);
             this.applyBuilderRule(builder, action);
@@ -92,7 +97,7 @@ export class City {
 
       // Branch out
       // First branch out left, if valid
-      if (rules.getBranchOutRule()) {
+      if (this.rules.getBranchOutRule()) {
         let newBuilder = new RoadBuilder(
           prevBuilderState.x,
           prevBuilderState.y,
@@ -123,7 +128,7 @@ export class City {
       }
 
       // Now to branch out right
-      if (rules.getBranchOutRule()) {
+      if (this.rules.getBranchOutRule()) {
         let newBuilder = new RoadBuilder(
           prevBuilderState.x,
           prevBuilderState.y,
@@ -239,7 +244,7 @@ export class City {
     // Check if we have reached intersection.
     if (this.map[builder.x][builder.y].type === GroundType.Street) {
       // Check if we want to go across the street and create an intersection.
-      if (rules.getCrossingRule()) {
+      if (this.rules.getCrossingRule()) {
         switch (builder.direction) {
           case Direction.North:
             if (
