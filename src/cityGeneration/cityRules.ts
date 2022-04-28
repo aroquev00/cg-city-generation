@@ -22,7 +22,7 @@ export class RoadRuleSystem {
     // TODO: Add rule for stopping (dead ends?)
   }
 
-  getRule() {
+  getRule(): string {
     const prob = Math.random();
     let accumulatedProb = 0.0;
     for (let rule of this.rules) {
@@ -31,23 +31,32 @@ export class RoadRuleSystem {
         return rule.action;
       }
     }
+    throw new Error("Rules do not add up to 1.");
   }
 
-  getBranchOutRule() {
+  getBranchOutRule(): boolean {
     const prob = Math.random();
-    if (prob > 0.82) {
+    if (prob > 0.8) {
       return true;
     } else {
       return false;
     }
   }
 
-  getCrossingRule() {
+  getCrossingRule(): boolean {
     const prob = Math.random();
     if (prob > 0.5) {
       return true;
     } else {
       return false;
     }
+  }
+
+  allowDeadEnds(): boolean {
+    return false;
+  }
+
+  getAvailableRules() {
+    return this.rules.map(rule => rule.action);
   }
 }
