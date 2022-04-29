@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@types/offscreencanvas": "^2019.6.4",
-    "ts-node": "^10.7.0"
+    "@types/offscreencanvas": "^2019.6.4"
   }
 }
