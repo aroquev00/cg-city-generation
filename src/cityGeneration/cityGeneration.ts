@@ -12,6 +12,14 @@ class RoadBuilder {
     this.direction = direction;
   }
 
+  equals(otherBuilder: RoadBuilder): boolean {
+    return (
+      this.direction === otherBuilder.direction &&
+      this.x === otherBuilder.x &&
+      this.y === otherBuilder.y
+    );
+  }
+
   copyState(otherBuilder: RoadBuilder) {
     this.x = otherBuilder.x;
     this.y = otherBuilder.y;
@@ -58,58 +66,63 @@ export class City {
   // Method that procedurally builds roads according to rules.
   createRoads() {
     // Starting road
-    this.queue.push(new RoadBuilder(
-      Math.floor(this.size / 2),
-      0,
-      Direction.North
-    ));
+    this.queue.push(
+      new RoadBuilder(Math.floor(this.size / 2), 0, Direction.North)
+    );
     this.map[Math.floor(this.size / 2)][0].type = GroundType.Street;
 
     // Build loop.
     while (this.queue.length > 0) {
-      const builder: RoadBuilder = this.queue.shift()!;
+      const mainBuilder: RoadBuilder = this.queue.shift()!;
 
       // Save current builder state.
-      const prevBuilderState = new RoadBuilder(builder.x, builder.y, builder.direction);
+      const prevMainBuilderState = new RoadBuilder(
+        mainBuilder.x,
+        mainBuilder.y,
+        mainBuilder.direction
+      );
 
       // Stochastically choose rule for next action.
-      const nextAction = this.rules.getRule();
-      this.applyBuilderRule(builder, nextAction);
+      const nextAction = this.rules.getMovementAction();
+      this.applyBuilderAction(mainBuilder, nextAction);
 
-      if (!this.isValidRoadPosition(builder)) {
-        // Check if there is a no dead end rule.
-        if (!this.rules.allowDeadEnds()) {
-          // Try to apply the other rules.
-          const availableActions = this.rules.getAvailableRules();
-          for (const action of availableActions) {
-            builder.copyState(prevBuilderState);
-            this.applyBuilderRule(builder, action);
-            if (this.isValidRoadPosition(builder)) {
-              this.queue.push(builder);
-              this.map[builder.x][builder.y].type = GroundType.Street;
-              break;
+      // If the main builder has stopped and its state has not changed, then there is no need to check for position validation.
+      if (!mainBuilder.equals(prevMainBuilderState)) {
+        if (this.isValidRoadPosition(mainBuilder)) {
+          // It is a valid road position.
+          this.queue.push(mainBuilder);
+          this.map[mainBuilder.x][mainBuilder.y].type = GroundType.Street;
+        } else {
+          // Check if there is a no dead end rule.
+          if (!this.rules.allowDeadEnd()) {
+            // Try to apply the other rules.
+            const availableActions = this.rules.getAvailableMovementActions();
+            for (const action of availableActions) {
+              mainBuilder.copyState(prevMainBuilderState);
+              this.applyBuilderAction(mainBuilder, action);
+              if (this.isValidRoadPosition(mainBuilder)) {
+                this.queue.push(mainBuilder);
+                this.map[mainBuilder.x][mainBuilder.y].type = GroundType.Street;
+                break;
+              }
             }
           }
         }
-      } else {
-        // It is a valid road position.
-        this.queue.push(builder);
-        this.map[builder.x][builder.y].type = GroundType.Street;
       }
 
       // Branch out to sides.
       // First try to branch out to the left.
-      if (this.rules.getBranchOutRule()) {
-        this.branchOutToSide(prevBuilderState, Side.Left);
+      if (this.rules.shouldBranchOut()) {
+        this.branchOutToSide(prevMainBuilderState, Side.Left);
       }
       // Now try to branch out to the right.
-      if (this.rules.getBranchOutRule()) {
-        this.branchOutToSide(prevBuilderState, Side.Right);
+      if (this.rules.shouldBranchOut()) {
+        this.branchOutToSide(prevMainBuilderState, Side.Right);
       }
     }
   }
 
-  applyBuilderRule(builder: RoadBuilder, action: string) {
+  applyBuilderAction(builder: RoadBuilder, action: string) {
     switch (action) {
       case "CS":
         switch (builder.direction) {
@@ -167,6 +180,8 @@ export class City {
             break;
         }
         break;
+      case "STOP":
+        break;
       default:
         throw new Error("Error in rule switch.");
         break;
@@ -187,7 +202,7 @@ export class City {
     // Check if we have reached intersection.
     if (this.map[builder.x][builder.y].type === GroundType.Street) {
       // Check if we want to go across the street and create an intersection.
-      if (this.rules.getCrossingRule()) {
+      if (this.rules.shouldCrossIntersectingRoad()) {
         switch (builder.direction) {
           case Direction.North:
             if (
@@ -230,8 +245,6 @@ export class City {
       return false;
     }
 
-    // TODO: No dead ends.
-
     // Check if no streets bounding new position, except special cases.
     switch (builder.direction) {
       case Direction.North:
@@ -239,7 +252,9 @@ export class City {
           this.map[builder.x + 1] !== undefined &&
           this.map[builder.x + 1][builder.y].type === GroundType.Street
         ) {
-          if (this.map[builder.x + 1][builder.y - 1].type === GroundType.Street) {
+          if (
+            this.map[builder.x + 1][builder.y - 1].type === GroundType.Street
+          ) {
             return false;
           }
         }
@@ -247,7 +262,9 @@ export class City {
           this.map[builder.x - 1] !== undefined &&
           this.map[builder.x - 1][builder.y].type === GroundType.Street
         ) {
-          if (this.map[builder.x - 1][builder.y - 1].type === GroundType.Street) {
+          if (
+            this.map[builder.x - 1][builder.y - 1].type === GroundType.Street
+          ) {
             return false;
           }
         }
@@ -257,7 +274,9 @@ export class City {
           this.map[builder.x + 1] !== undefined &&
           this.map[builder.x + 1][builder.y].type === GroundType.Street
         ) {
-          if (this.map[builder.x + 1][builder.y + 1].type === GroundType.Street) {
+          if (
+            this.map[builder.x + 1][builder.y + 1].type === GroundType.Street
+          ) {
             return false;
           }
         }
@@ -265,7 +284,9 @@ export class City {
           this.map[builder.x - 1] !== undefined &&
           this.map[builder.x - 1][builder.y].type === GroundType.Street
         ) {
-          if (this.map[builder.x - 1][builder.y + 1].type === GroundType.Street) {
+          if (
+            this.map[builder.x - 1][builder.y + 1].type === GroundType.Street
+          ) {
             return false;
           }
         }
@@ -275,7 +296,9 @@ export class City {
           this.map[builder.x][builder.y + 1] !== undefined &&
           this.map[builder.x][builder.y + 1].type === GroundType.Street
         ) {
-          if (this.map[builder.x - 1][builder.y + 1].type === GroundType.Street) {
+          if (
+            this.map[builder.x - 1][builder.y + 1].type === GroundType.Street
+          ) {
             return false;
           }
         }
@@ -283,7 +306,9 @@ export class City {
           this.map[builder.x][builder.y - 1] !== undefined &&
           this.map[builder.x][builder.y - 1].type === GroundType.Street
         ) {
-          if (this.map[builder.x - 1][builder.y - 1].type === GroundType.Street) {
+          if (
+            this.map[builder.x - 1][builder.y - 1].type === GroundType.Street
+          ) {
             return false;
           }
         }
@@ -293,7 +318,9 @@ export class City {
           this.map[builder.x][builder.y + 1] !== undefined &&
           this.map[builder.x][builder.y + 1].type === GroundType.Street
         ) {
-          if (this.map[builder.x + 1][builder.y + 1].type === GroundType.Street) {
+          if (
+            this.map[builder.x + 1][builder.y + 1].type === GroundType.Street
+          ) {
             return false;
           }
         }
@@ -301,7 +328,9 @@ export class City {
           this.map[builder.x][builder.y - 1] !== undefined &&
           this.map[builder.x][builder.y - 1].type === GroundType.Street
         ) {
-          if (this.map[builder.x + 1][builder.y - 1].type === GroundType.Street) {
+          if (
+            this.map[builder.x + 1][builder.y - 1].type === GroundType.Street
+          ) {
             return false;
           }
         }
@@ -312,11 +341,7 @@ export class City {
   }
 
   branchOutToSide(builder: RoadBuilder, side: Side) {
-    let newBuilder = new RoadBuilder(
-      builder.x,
-      builder.y,
-      builder.direction
-    );
+    let newBuilder = new RoadBuilder(builder.x, builder.y, builder.direction);
     if (side === Side.Left) {
       switch (builder.direction) {
         case Direction.North:
