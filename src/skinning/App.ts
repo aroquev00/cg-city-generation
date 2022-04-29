@@ -24,7 +24,11 @@ import { RenderPass } from "../lib/webglutils/RenderPass.js";
 import { Camera } from "../lib/webglutils/Camera.js";
 import { Cylinder } from "../lib/webglutils/Cylinder.js";
 
+import { CityGround } from "../lib/webglutils/CityGround.js";
+
 import { Keyframe, interpolateSkeleton } from "./Utils.js";
+
+import { City } from "../cityGeneration/cityGeneration.js";
 
 export const debug = false;
 
@@ -48,6 +52,10 @@ export class SkinningAnimation extends CanvasAnimation {
   private millis: number;
 
   private loadedScene: string;
+
+  /* Street Rendering Info */
+  private city: City;
+  private cityGround: CityGround;
 
   /* Floor Rendering Info */
   private floor: Floor;
@@ -88,6 +96,9 @@ export class SkinningAnimation extends CanvasAnimation {
 
     this.ctx = Debugger.makeDebugContext(this.ctx);
     let gl = this.ctx;
+
+    this.city = new City(20, "Downtown");
+    this.cityGround = new CityGround(this.city);
 
     this.floor = new Floor();
     this.cylinder = new Cylinder(10);

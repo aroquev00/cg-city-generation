@@ -1,4 +1,4 @@
-[
+export const cityProbs = [
   {
     "type": "Downtown",
     "movementActionRules": [
@@ -50,4 +50,4 @@
       }
     ]
   }
-]
+];
