@@ -10,3 +10,8 @@ export enum GroundType {
   Block,
   Street,
 }
+
+export enum Side {
+  Left,
+  Right,
+}

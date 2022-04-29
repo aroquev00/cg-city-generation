@@ -1,5 +1,5 @@
 import { RoadRuleSystem } from "./cityRules";
-import { Direction, GroundType } from "./cityEnums";
+import { Direction, GroundType, Side } from "./cityEnums";
 
 class RoadBuilder {
   public direction: Direction;
@@ -67,20 +67,21 @@ export class City {
 
     // Build loop.
     while (this.queue.length > 0) {
-      let builder: RoadBuilder = this.queue.shift()!;
+      const builder: RoadBuilder = this.queue.shift()!;
 
       // Save current builder state.
-      let prevBuilderState = new RoadBuilder(builder.x, builder.y, builder.direction);
+      const prevBuilderState = new RoadBuilder(builder.x, builder.y, builder.direction);
 
-      // choose rule
+      // Stochastically choose rule for next action.
       const nextAction = this.rules.getRule();
       this.applyBuilderRule(builder, nextAction);
+
       if (!this.isValidRoadPosition(builder)) {
-        // Check if there is a no dead end rule
+        // Check if there is a no dead end rule.
         if (!this.rules.allowDeadEnds()) {
-          // Try to apply the other rules
-          let availableActions = this.rules.getAvailableRules();
-          for (let action of availableActions) {
+          // Try to apply the other rules.
+          const availableActions = this.rules.getAvailableRules();
+          for (const action of availableActions) {
             builder.copyState(prevBuilderState);
             this.applyBuilderRule(builder, action);
             if (this.isValidRoadPosition(builder)) {
@@ -91,73 +92,19 @@ export class City {
           }
         }
       } else {
+        // It is a valid road position.
         this.queue.push(builder);
         this.map[builder.x][builder.y].type = GroundType.Street;
       }
 
-      // Branch out
-      // First branch out left, if valid
+      // Branch out to sides.
+      // First try to branch out to the left.
       if (this.rules.getBranchOutRule()) {
-        let newBuilder = new RoadBuilder(
-          prevBuilderState.x,
-          prevBuilderState.y,
-          prevBuilderState.direction
-        );
-        switch (builder.direction) {
-          case Direction.North:
-            newBuilder.x = builder.x - 1;
-            newBuilder.direction = Direction.West;
-            break;
-          case Direction.South:
-            newBuilder.x = builder.x + 1;
-            newBuilder.direction = Direction.East;
-            break;
-          case Direction.East:
-            newBuilder.y = builder.y + 1;
-            newBuilder.direction = Direction.North;
-            break;
-          case Direction.West:
-            newBuilder.y = builder.y - 1;
-            newBuilder.direction = Direction.South;
-            break;
-        }
-        if (this.isValidRoadPosition(newBuilder)) {
-          this.queue.push(newBuilder);
-          this.map[newBuilder.x][newBuilder.y].type = GroundType.Street;
-        }
+        this.branchOutToSide(prevBuilderState, Side.Left);
       }
-
-      // Now to branch out right
+      // Now try to branch out to the right.
       if (this.rules.getBranchOutRule()) {
-        let newBuilder = new RoadBuilder(
-          prevBuilderState.x,
-          prevBuilderState.y,
-          prevBuilderState.direction
-        );
-        switch (builder.direction) {
-          case Direction.North:
-            newBuilder.x = builder.x + 1;
-            newBuilder.direction = Direction.East;
-            break;
-          case Direction.South:
-            newBuilder.x = builder.x - 1;
-            newBuilder.direction = Direction.West;
-            break;
-          case Direction.East:
-            newBuilder.y = builder.y - 1;
-            newBuilder.direction = Direction.South;
-            break;
-          case Direction.West:
-            newBuilder.y = builder.y + 1;
-            newBuilder.direction = Direction.North;
-            break;
-          default:
-            break;
-        }
-        if (this.isValidRoadPosition(newBuilder)) {
-          this.queue.push(newBuilder);
-          this.map[newBuilder.x][newBuilder.y].type = GroundType.Street;
-        }
+        this.branchOutToSide(prevBuilderState, Side.Right);
       }
     }
   }
@@ -198,8 +145,6 @@ export class City {
             builder.y += 1;
             builder.direction = Direction.North;
             break;
-          default:
-            break;
         }
         break;
       case "TL":
@@ -220,12 +165,10 @@ export class City {
             builder.y -= 1;
             builder.direction = Direction.South;
             break;
-          default:
-            break;
         }
         break;
       default:
-        throw new Error("Error in rule switch");
+        throw new Error("Error in rule switch.");
         break;
     }
   }
@@ -366,6 +309,59 @@ export class City {
     }
 
     return true;
+  }
+
+  branchOutToSide(builder: RoadBuilder, side: Side) {
+    let newBuilder = new RoadBuilder(
+      builder.x,
+      builder.y,
+      builder.direction
+    );
+    if (side === Side.Left) {
+      switch (builder.direction) {
+        case Direction.North:
+          newBuilder.x = builder.x - 1;
+          newBuilder.direction = Direction.West;
+          break;
+        case Direction.South:
+          newBuilder.x = builder.x + 1;
+          newBuilder.direction = Direction.East;
+          break;
+        case Direction.East:
+          newBuilder.y = builder.y + 1;
+          newBuilder.direction = Direction.North;
+          break;
+        case Direction.West:
+          newBuilder.y = builder.y - 1;
+          newBuilder.direction = Direction.South;
+          break;
+      }
+    } else {
+      switch (builder.direction) {
+        case Direction.North:
+          newBuilder.x = builder.x + 1;
+          newBuilder.direction = Direction.East;
+          break;
+        case Direction.South:
+          newBuilder.x = builder.x - 1;
+          newBuilder.direction = Direction.West;
+          break;
+        case Direction.East:
+          newBuilder.y = builder.y - 1;
+          newBuilder.direction = Direction.South;
+          break;
+        case Direction.West:
+          newBuilder.y = builder.y + 1;
+          newBuilder.direction = Direction.North;
+          break;
+        default:
+          break;
+      }
+    }
+    if (this.isValidRoadPosition(newBuilder)) {
+      this.queue.push(newBuilder);
+      this.map[newBuilder.x][newBuilder.y].type = GroundType.Street;
+    }
   }
 
   printCity() {
