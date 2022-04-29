@@ -44,6 +44,28 @@ export const floorFSText = `
     }
 `;
 
+export const buildingVSText = `
+    precision mediump float;
+
+    uniform mat4 mWorld;
+    uniform mat4 mView;
+    uniform mat4 mProj;
+    
+    attribute vec3 vertPosition;
+
+    void main () {
+        gl_Position = mProj * mView * mWorld * vec4(vertPosition, 1.0);
+    }
+`;
+
+export const buildingFSText = `
+    precision mediump float;
+
+    void main() {
+        gl_FragColor = vec4(0.0, 1.0, 1.0, 0.0);
+    }
+`;
+
 export const sceneVSText = `
     precision mediump float;
 

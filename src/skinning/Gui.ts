@@ -152,11 +152,12 @@ export class GUI implements IGUI {
     
     // TODO
     // Some logic to rotate the bones, instead of moving the camera, if there is a currently highlighted bone
-    if (this.checkIfMouseIntersectsBone(mouse.offsetX, mouse.offsetY)) {
+    /*if (this.checkIfMouseIntersectsBone(mouse.offsetX, mouse.offsetY)) {
       this.draggingBone = true;
     } else {
       this.dragging = true;
-    }
+    }*/
+    this.dragging = true;
     this.prevX = mouse.screenX;
     this.prevY = mouse.screenY;
 
@@ -224,7 +225,7 @@ export class GUI implements IGUI {
     // You will want logic here:
     // 1) To highlight a bone, if the mouse is hovering over a bone;
     // 2) To rotate a bone, if the mouse button is pressed and currently highlighting a bone.
-    if (this.draggingBone) {
+    /*if (this.draggingBone) {
       // Work on rotating the bone.
       let inverse = new Mat4();
       this.camera.projMatrix().multiply(this.camera.viewMatrix(), inverse);
@@ -253,7 +254,7 @@ export class GUI implements IGUI {
     } else {
       // Just highlight bone
       this.checkIfMouseIntersectsBone(mouse.offsetX, mouse.offsetY);
-    }
+    }*/
   }
 
   private checkIfMouseIntersectsBone(mouseX: number, mouseY: number) {

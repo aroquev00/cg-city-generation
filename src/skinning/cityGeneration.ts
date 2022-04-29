@@ -1,4 +1,4 @@
-import { RoadRuleSystem } from "./cityRules";
+import { RoadRuleSystem } from "./cityRules.js";
 
 let rules = new RoadRuleSystem();
 
@@ -22,7 +22,7 @@ class CityNode {
   }
 }
 
-class City {
+export class City {
   public map: CityNode[][];
   public size: number;
 
