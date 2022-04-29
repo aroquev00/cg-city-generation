@@ -1,5 +1,4 @@
-import * as fs from 'fs'
-
+import { cityProbs } from "./cityProbs.js";
 class RoadRule {
   public action: string;
   public probability: number;
@@ -9,7 +8,6 @@ class RoadRule {
     this.probability = probability;
   }
 }
-
 
 export class RoadRuleSystem {
   public type: string;
@@ -21,39 +19,50 @@ export class RoadRuleSystem {
   constructor(type: string) {
     this.type = type;
 
-    //const rulesJson = JSON.parse(fs.readFileSync('/static/cityGeneration/cityProbs.json', 'utf-8'));
-    const rulesJson = JSON.parse(fs.readFileSync('./src/cityGeneration/static/cityGeneration/cityProbs.json', 'utf-8'));
-
-    for (const ruleJson of rulesJson) {
-      if (ruleJson.type === type) {
-        this.movementActionRules = ruleJson.movementActionRules.map((rule: { action: string; probability: number; }) => new RoadRule(rule.action, rule.probability));
-        this.branchOutRules = ruleJson.branchOutRules.map((rule: { action: string; probability: number; }) => new RoadRule(rule.action, rule.probability));
-        this.crossIntersectionRules = ruleJson.crossIntersectionRules.map((rule: { action: string; probability: number; }) => new RoadRule(rule.action, rule.probability));
-        this.deadEndRules = ruleJson.deadEndRules.map((rule: { action: string; probability: number; }) => new RoadRule(rule.action, rule.probability));
+    for (const ruleObject of cityProbs) {
+      if (ruleObject.type === type) {
+        this.movementActionRules = ruleObject.movementActionRules.map(
+          (rule: { action: string; probability: number }) =>
+            new RoadRule(rule.action, rule.probability)
+        );
+        this.branchOutRules = ruleObject.branchOutRules.map(
+          (rule: { action: string; probability: number }) =>
+            new RoadRule(rule.action, rule.probability)
+        );
+        this.crossIntersectionRules = ruleObject.crossIntersectionRules.map(
+          (rule: { action: string; probability: number }) =>
+            new RoadRule(rule.action, rule.probability)
+        );
+        this.deadEndRules = ruleObject.deadEndRules.map(
+          (rule: { action: string; probability: number }) =>
+            new RoadRule(rule.action, rule.probability)
+        );
         break;
       }
     }
   }
 
   getAvailableMovementActions() {
-    return this.movementActionRules.map(rule => rule.action);
+    return this.movementActionRules.map((rule) => rule.action);
   }
 
   getMovementAction(): string {
     return this.getActionFromRules(this.movementActionRules);
   }
-  
 
   shouldBranchOut(): boolean {
-    return (this.getActionFromRules(this.branchOutRules) === "doBranchOut");
+    return this.getActionFromRules(this.branchOutRules) === "doBranchOut";
   }
 
   shouldCrossIntersectingRoad(): boolean {
-    return (this.getActionFromRules(this.crossIntersectionRules) === "doCrossIntersection");
+    return (
+      this.getActionFromRules(this.crossIntersectionRules) ===
+      "doCrossIntersection"
+    );
   }
 
   allowDeadEnd(): boolean {
-    return (this.getActionFromRules(this.deadEndRules) === "doAllowDeadEnd");
+    return this.getActionFromRules(this.deadEndRules) === "doAllowDeadEnd";
   }
 
   getActionFromRules(rules: RoadRule[]): string {
@@ -67,5 +76,4 @@ export class RoadRuleSystem {
     }
     throw new Error("Rules do not add up to at least 1.");
   }
-
 }

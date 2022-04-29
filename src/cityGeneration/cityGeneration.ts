@@ -1,5 +1,5 @@
-import { RoadRuleSystem } from "./cityRules";
-import { Direction, GroundType, Side } from "./cityEnums";
+import { RoadRuleSystem } from "./cityRules.js";
+import { Direction, GroundType, Side } from "./cityEnums.js";
 
 class RoadBuilder {
   public direction: Direction;
