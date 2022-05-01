@@ -1,3 +1,36 @@
+export const cityGroundVSText = `
+    precision mediump float;
+
+    uniform vec4 uLightPos;
+    uniform mat4 uWorld;
+    uniform mat4 uView;
+    uniform mat4 uProj;
+
+    attribute vec4 aVertPos;
+
+    //varying vec4 vClipPos;
+
+    void main () {
+
+        gl_Position = uProj * uView * uWorld * aVertPos;
+        //vClipPos = gl_Position;
+    }
+`;
+
+export const cityGroundFSText = `
+    precision mediump float;
+
+    uniform mat4 uViewInv;
+    uniform mat4 uProjInv;
+    uniform vec4 uLightPos;
+
+    //varying vec4 vClipPos;
+
+    void main() {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+`;
+
 export const floorVSText = `
     precision mediump float;
 
