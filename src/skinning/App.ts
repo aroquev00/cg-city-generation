@@ -373,7 +373,7 @@ export class SkinningAnimation extends CanvasAnimation {
         gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().inverse().all()));
     });
 
-    this.cityGroundRenderPass.setDrawData(this.ctx.TRIANGLES, this.floor.indicesFlat().length, this.ctx.UNSIGNED_INT, 0);
+    this.cityGroundRenderPass.setDrawData(this.ctx.TRIANGLES, this.cityGround.indicesFlat().length, this.ctx.UNSIGNED_INT, 0);
     this.cityGroundRenderPass.setup();
   }
   
