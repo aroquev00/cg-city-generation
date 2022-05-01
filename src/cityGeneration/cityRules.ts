@@ -1,4 +1,4 @@
-import { cityProbs } from "./cityProbs.js";
+import { cityProbs } from "./static/cityProbs.js";
 class RoadRule {
   public action: string;
   public probability: number;

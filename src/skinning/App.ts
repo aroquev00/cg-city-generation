@@ -16,7 +16,9 @@ import {
   skeletonFSText,
   skeletonVSText,
   sBackVSText,
-  sBackFSText
+  sBackFSText,
+  buildingFSText,
+  buildingVSText
 } from "./Shaders.js";
 import { Mat4, Vec4, Vec3 } from "../lib/TSM.js";
 import { CLoader } from "./AnimationFileLoader.js";
@@ -27,7 +29,7 @@ import { Cylinder } from "../lib/webglutils/Cylinder.js";
 import { CityGround } from "../lib/webglutils/CityGround.js";
 
 import { Keyframe, interpolateSkeleton } from "./Utils.js";
-
+import { Buildings } from "./buildingGeneration.js";
 import { City } from "../cityGeneration/cityGeneration.js";
 
 export const debug = false;
@@ -74,7 +76,10 @@ export class SkinningAnimation extends CanvasAnimation {
   /* Cylinder rendering info */
   private cylinderRenderPass: RenderPass;
   private cylinder: Cylinder;
-  
+
+  /* Building rendering info */
+  private buildingRenderPass: RenderPass;
+  private buildings: Buildings;
 
   /* Global Rendering Info */
   private lightPosition: Vec4;
@@ -107,12 +112,18 @@ export class SkinningAnimation extends CanvasAnimation {
     this.sceneRenderPass = new RenderPass(this.extVAO, gl, sceneVSText, sceneFSText);
     this.skeletonRenderPass = new RenderPass(this.extVAO, gl, skeletonVSText, skeletonFSText);  
     this.cylinderRenderPass = new RenderPass(this.extVAO, gl, cylinderVSText, cylinderFSText);  
+    this.buildingRenderPass = new RenderPass(this.extVAO, gl, buildingVSText, buildingFSText);
 
     this.gui = new GUI(this.canvas2d, this);
     this.lightPosition = new Vec4([-10, 10, -10, 1]);
     this.backgroundColor = new Vec4([0.0, 0.37254903, 0.37254903, 1.0]);
 
     this.initFloor();
+    this.city = new City(40, "Downtown");
+    this.cityGround = new CityGround(this.city)
+
+    this.buildings = new Buildings(this.city);
+    this.initBuildings();
     this.scene = new CLoader("");
 
     // Status bar
@@ -167,10 +178,37 @@ export class SkinningAnimation extends CanvasAnimation {
 
   public initScene(): void {
     if (this.scene.meshes.length === 0) { return; }
-    this.initModel();
-    this.initSkeleton();
-    this.initCylinder();
+    //this.initModel();
+    //this.initSkeleton();
+    //this.initCylinder();
+    this.initBuildings();
     this.gui.reset();
+  }
+
+  public initBuildings(){
+
+    console.log(this.buildings.getIndices());
+    console.log(this.buildings.getVertices());
+    this.buildingRenderPass.setIndexBufferData(this.buildings.getIndices());
+
+    this.buildingRenderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
+      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getVertices());
+
+    this.buildingRenderPass.addUniform("mWorld",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(loc, false, new Float32Array(new Mat4().setIdentity().all()));        
+    });
+    this.buildingRenderPass.addUniform("mProj",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().all()));
+    });
+    this.buildingRenderPass.addUniform("mView",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().all()));
+    });
+
+    this.buildingRenderPass.setDrawData(this.ctx.TRIANGLES, this.buildings.getIndices().length, this.ctx.UNSIGNED_INT, 0);
+    this.buildingRenderPass.setup();
   }
 
   public initCylinder(): void {
@@ -430,21 +468,22 @@ export class SkinningAnimation extends CanvasAnimation {
     gl.viewport(x, y, width, height);
 
     this.floorRenderPass.draw();
+    this.buildingRenderPass.draw();
     
 
     /* Draw Scene */
-    if (this.scene.meshes.length > 0) {
+    /*if (this.scene.meshes.length > 0) {
 
-      this.sceneRenderPass.draw();
+      //this.sceneRenderPass.draw();
       gl.disable(gl.DEPTH_TEST);
-      this.skeletonRenderPass.draw();
+      //this.skeletonRenderPass.draw();
       // TODO
       // Also draw the highlighted bone (if applicable)
-      if (getHighlightedBoneIndex() !== null) {
-        this.cylinderRenderPass.draw();
-      }
+      //if (getHighlightedBoneIndex() !== null) {
+      //  this.cylinderRenderPass.draw();
+      //}
       gl.enable(gl.DEPTH_TEST);      
-    }
+    }*/
   }
 
   public getGUI(): GUI {
