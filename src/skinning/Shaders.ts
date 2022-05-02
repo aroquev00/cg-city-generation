@@ -8,12 +8,12 @@ export const cityGroundVSText = `
 
     attribute vec4 aVertPos;
 
-    //varying vec4 vClipPos;
+    varying vec4 vClipPos;
 
     void main () {
 
         gl_Position = uProj * uView * uWorld * aVertPos;
-        //vClipPos = gl_Position;
+        vClipPos = gl_Position;
     }
 `;
 
@@ -24,7 +24,7 @@ export const cityGroundFSText = `
     uniform mat4 uProjInv;
     uniform vec4 uLightPos;
 
-    //varying vec4 vClipPos;
+    varying vec4 vClipPos;
 
     void main() {
         gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
