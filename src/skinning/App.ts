@@ -193,6 +193,9 @@ export class SkinningAnimation extends CanvasAnimation {
 
     this.buildingRenderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
       3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getVertices());
+    
+      this.buildingRenderPass.addAttribute("normal", 3, this.ctx.FLOAT, false,
+      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getNormals());
 
     this.buildingRenderPass.addUniform("mWorld",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
@@ -205,6 +208,10 @@ export class SkinningAnimation extends CanvasAnimation {
     this.buildingRenderPass.addUniform("mView",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().all()));
+    });
+    this.buildingRenderPass.addUniform("lightPosition",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniform4fv(loc, this.lightPosition.xyzw);
     });
 
     this.buildingRenderPass.setDrawData(this.ctx.TRIANGLES, this.buildings.getIndices().length, this.ctx.UNSIGNED_INT, 0);

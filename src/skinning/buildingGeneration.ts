@@ -40,6 +40,15 @@ export class Buildings {
         }
         return Uint32Array.from(values);
     }
+
+    getNormals(): Float32Array {
+        let values = [];
+        for (let i = 0;i < this.buildings.length;i++){
+            let b = this.buildings[i];
+            values.push(...b.normals);
+        }
+        return Float32Array.from(values);
+    }
 }
 
 
@@ -95,6 +104,45 @@ const cubeIndices = [
     20, 21, 22,     20, 22, 23,   // left
 ];
 
+const cubeNormals = [
+    // Front
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 
+    0.0, 0.0, 1.0, 
+    0.0, 0.0, 1.0, 
+
+    // Back
+    0.0, 0.0, -1.0, 
+    0.0, 0.0, -1.0, 
+    0.0, 0.0, -1.0, 
+    0.0, 0.0, -1.0, 
+
+    // Top
+    0.0, 1.0, 0.0, 
+    0.0, 1.0, 0.0, 
+    0.0, 1.0, 0.0, 
+    0.0, 1.0, 0.0, 
+
+    // Bottom
+    0.0, -1.0, 0.0, 
+    0.0, -1.0, 0.0, 
+    0.0, -1.0, 0.0, 
+    0.0, -1.0, 0.0, 
+
+    // Right
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+
+    // Left
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+
+];
+
 // Contains all info for rendering
 class Building {
     private posX: number;
@@ -128,6 +176,7 @@ class Building {
         }
         this.vertices = clone;
         this.indices = [...cubeIndices];
+        this.normals = [...cubeNormals];
     }
 }
 
