@@ -100,9 +100,9 @@ export class GUI implements IGUI {
     this.time = 0;
     this.mode = Mode.edit;
     this.camera = new Camera(
-      new Vec3([0, 0, -6]),
-      new Vec3([0, 0, 0]),
-      new Vec3([0, 1, 0]),
+      new Vec3([10, 30, 10]),
+      new Vec3([10, 0, 10]),
+      new Vec3([0, 0, 1]),
       45,
       this.width / this.viewPortHeight,
       0.1,
