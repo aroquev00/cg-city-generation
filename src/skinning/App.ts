@@ -6,6 +6,8 @@ import {
 import { Floor } from "../lib/webglutils/Floor.js";
 import { GUI, Mode } from "./Gui.js";
 import {
+  cityGroundVSText,
+  cityGroundFSText,
   sceneFSText,
   sceneVSText,
   sceneTextureFSText,
@@ -55,9 +57,10 @@ export class SkinningAnimation extends CanvasAnimation {
 
   private loadedScene: string;
 
-  /* Street Rendering Info */
+  /* City Rendering Info */
   private city: City;
   private cityGround: CityGround;
+  private cityGroundRenderPass: RenderPass;
 
   /* Floor Rendering Info */
   private floor: Floor;
@@ -108,6 +111,8 @@ export class SkinningAnimation extends CanvasAnimation {
     this.floor = new Floor();
     this.cylinder = new Cylinder(10);
 
+    this.cityGroundRenderPass = new RenderPass(this.extVAO, gl, cityGroundVSText, cityGroundFSText);
+
     this.floorRenderPass = new RenderPass(this.extVAO, gl, floorVSText, floorFSText);
     this.sceneRenderPass = new RenderPass(this.extVAO, gl, sceneVSText, sceneFSText);
     this.skeletonRenderPass = new RenderPass(this.extVAO, gl, skeletonVSText, skeletonFSText);  
@@ -117,6 +122,8 @@ export class SkinningAnimation extends CanvasAnimation {
     this.gui = new GUI(this.canvas2d, this);
     this.lightPosition = new Vec4([-10, 10, -10, 1]);
     this.backgroundColor = new Vec4([0.0, 0.37254903, 0.37254903, 1.0]);
+
+    this.initCityGround()
 
     this.initFloor();
     this.city = new City(40, "Downtown");
@@ -371,6 +378,49 @@ export class SkinningAnimation extends CanvasAnimation {
     this.skeletonRenderPass.setup();
   }
 
+  /**
+   * Sets up the city ground drawing
+   */
+  public initCityGround(): void {
+    this.cityGroundRenderPass.setIndexBufferData(this.cityGround.indicesFlat());
+    this.cityGroundRenderPass.addAttribute("aVertPos",
+      4,
+      this.ctx.FLOAT,
+      false,
+      4 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.cityGround.positionsFlat()
+    );
+
+    this.cityGroundRenderPass.addUniform("uLightPos",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniform4fv(loc, this.lightPosition.xyzw);
+    });
+    this.cityGroundRenderPass.addUniform("uWorld",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(loc, false, new Float32Array(Mat4.identity.all()));
+    });
+    this.cityGroundRenderPass.addUniform("uProj",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().all()));
+    });
+    this.cityGroundRenderPass.addUniform("uView",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().all()));
+    });
+    this.cityGroundRenderPass.addUniform("uProjInv",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().inverse().all()));
+    });
+    this.cityGroundRenderPass.addUniform("uViewInv",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().inverse().all()));
+    });
+
+    this.cityGroundRenderPass.setDrawData(this.ctx.TRIANGLES, this.cityGround.indicesFlat().length, this.ctx.UNSIGNED_INT, 0);
+    this.cityGroundRenderPass.setup();
+  }
   
   /**
    * Sets up the floor drawing
@@ -475,7 +525,12 @@ export class SkinningAnimation extends CanvasAnimation {
     gl.viewport(x, y, width, height);
 
     this.floorRenderPass.draw();
+
+
+    this.cityGroundRenderPass.draw();
+
     this.buildingRenderPass.draw();
+
     
 
     /* Draw Scene */

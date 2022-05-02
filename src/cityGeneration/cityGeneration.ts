@@ -41,6 +41,8 @@ export class City {
   public type: string;
   public rules: RoadRuleSystem;
 
+  public streetsPos: [number, number][];
+
   private queue: RoadBuilder[];
 
   constructor(size: number, type: string) {
@@ -61,6 +63,15 @@ export class City {
     }
 
     this.createRoads();
+
+    this.streetsPos = [];
+    for (let x = 0; x < size; x++) {
+      for (let y = 0; y < size; y++) {
+        if (this.map[x][y].type === GroundType.Street) {
+          this.streetsPos.push([x, y]);
+        }
+      }
+    }
   }
 
   // Method that procedurally builds roads according to rules.
