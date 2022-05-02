@@ -50,10 +50,17 @@ export const buildingVSText = `
     uniform mat4 mWorld;
     uniform mat4 mView;
     uniform mat4 mProj;
+    uniform vec4 lightPosition;
     
     attribute vec3 vertPosition;
+    attribute vec3 normal;
+    
+    varying vec4 color;
 
     void main () {
+        vec4 lightDir = lightPosition - vec4(vertPosition, 1.0);
+        color = vec4(.8, .8, .8, 1.0) * max(dot(normalize(lightDir), vec4(normal, 1.0)), 0.0);
+        color.w = 1.0;
         gl_Position = mProj * mView * mWorld * vec4(vertPosition, 1.0);
     }
 `;
@@ -61,8 +68,10 @@ export const buildingVSText = `
 export const buildingFSText = `
     precision mediump float;
 
+    varying vec4 color;
+
     void main() {
-        gl_FragColor = vec4(0.0, 1.0, 1.0, 0.0);
+        gl_FragColor = color;
     }
 `;
 
