@@ -7,9 +7,9 @@ export class CityGround implements MaterialObject {
   private cityModel: City;
 
   private floorY: GLfloat = 0;
-  private vertices: Vec4[];
-  private ind: Vec3[];
-  private norms: Vec4[];
+  private vertices: Vec4[] = [];
+  private ind: Vec3[] = [];
+  private norms: Vec4[] = [];
 
   private verticesF32: Float32Array;
   private indicesU32: Uint32Array;
@@ -19,16 +19,29 @@ export class CityGround implements MaterialObject {
     // Build city model.
     this.cityModel = city;
 
-    /* Set default position. */
-    this.vertices = [
-      new Vec4([0, this.floorY, 0, 1]),
-      new Vec4([1, 0, 0, 0]),
-      new Vec4([0, 0, 1, 0]),
-      new Vec4([-1, 0, 0, 0]),
-      new Vec4([0, 0, -1, 0]),
-    ];
-    console.assert(this.vertices != null);
-    console.assert(this.vertices.length === 5);
+
+    for (let x = 0; x < city.size; x++) {
+      for (let y = 0; y < city.size; y++) {
+        // Set up vertices and their normals.
+        // Left bottom edge. # 2
+        this.vertices.push(new Vec4([x, this.floorY, y, 1]));
+        this.norms.push(new Vec4([0, 1, 0, 1]));
+        // Right bottom edge. 3 1
+        this.vertices.push(new Vec4([x + 1, this.floorY, y, 1]));
+        this.norms.push(new Vec4([0, 1, 0, 1]));
+        // Left top edge. 1 3
+        this.vertices.push(new Vec4([x, this.floorY, y + 1, 1]));
+        this.norms.push(new Vec4([0, 1, 0, 1]));
+        // Right top edge. 2 #
+        this.vertices.push(new Vec4([x + 1, this.floorY, y + 1, 1]));
+        this.norms.push(new Vec4([0, 1, 0, 1]));
+
+        // Set up indices.
+        const iterNum = (x * city.size + y) * 4;
+        this.ind.push(new Vec3([iterNum + 2, iterNum + 3, iterNum + 1]));
+        this.ind.push(new Vec3([iterNum + 1, iterNum, iterNum + 2]));
+      }
+    }
 
     /* Flatten Position. */
     this.verticesF32 = new Float32Array(this.vertices.length * 4);
@@ -36,17 +49,11 @@ export class CityGround implements MaterialObject {
       this.verticesF32.set(v.xyzw, i * 4);
     });
     console.assert(this.verticesF32 != null);
-    console.assert(this.verticesF32.length === 5 * 4);
+    console.assert(this.verticesF32.length === city.size ** 2 * 16);
 
     /* Set indices. */
-    this.ind = [
-      new Vec3([0, 2, 1]),
-      new Vec3([0, 3, 2]),
-      new Vec3([0, 4, 3]),
-      new Vec3([0, 1, 4]),
-    ];
     console.assert(this.ind != null);
-    console.assert(this.ind.length === 4);
+    console.assert(this.ind.length === city.size ** 2 * 2);
 
     /* Flatten Indices. */
     this.indicesU32 = new Uint32Array(this.ind.length * 3);
@@ -54,15 +61,9 @@ export class CityGround implements MaterialObject {
       this.indicesU32.set(v.xyz, i * 3);
     });
     console.assert(this.indicesU32 != null);
-    console.assert(this.indicesU32.length === 4 * 3);
+    console.assert(this.indicesU32.length === city.size ** 2 * 2 * 3);
 
     /* Set Normals. */
-    this.norms = [
-      new Vec4([0.0, 1.0, 0.0, 0.0]),
-      new Vec4([0.0, 1.0, 0.0, 0.0]),
-      new Vec4([0.0, 1.0, 0.0, 0.0]),
-      new Vec4([0.0, 1.0, 0.0, 0.0]),
-    ];
     this.normalsF32 = new Float32Array(this.norms.length * 4);
     this.norms.forEach((v: Vec4, i: number) => {
       this.normalsF32.set(v.xyzw, i * 4);
@@ -70,12 +71,12 @@ export class CityGround implements MaterialObject {
   }
 
   public positions(): Vec4[] {
-    console.assert(this.vertices.length === 5);
+    console.assert(this.vertices.length === this.cityModel.size ** 2);
     return this.vertices;
   }
 
   public positionsFlat(): Float32Array {
-    console.assert(this.verticesF32.length === 5 * 4);
+    console.assert(this.verticesF32.length === this.cityModel.size ** 2 * 16);
     return this.verticesF32;
   }
 
@@ -94,12 +95,12 @@ export class CityGround implements MaterialObject {
   }
 
   public indices(): Vec3[] {
-    console.assert(this.ind.length === 4);
+    console.assert(this.ind.length === this.cityModel.size ** 2 * 2);
     return this.ind;
   }
 
   public indicesFlat(): Uint32Array {
-    console.assert(this.indicesU32.length === 4 * 3);
+    console.assert(this.indicesU32.length === this.cityModel.size ** 2 * 6);
     return this.indicesU32;
   }
 
