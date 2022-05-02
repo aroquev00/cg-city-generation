@@ -170,9 +170,9 @@ class Building {
     private generateVertices(){
         let clone = [...cubeVerts];
         for(let i = 0;i < clone.length;i+=3){
-            clone[i] = clone[i] * .8 + this.posX * CELL_SIZE;
+            clone[i] = clone[i] * .8 + this.posX * CELL_SIZE + .1;
             clone[i+1] = clone[i+1] * this.height * CELL_SIZE;
-            clone[i+2] = clone[i+2] * .8 + this.posY * CELL_SIZE;
+            clone[i+2] = clone[i+2] * .8 + this.posY * CELL_SIZE + .1;
         }
         this.vertices = clone;
         this.indices = [...cubeIndices];
