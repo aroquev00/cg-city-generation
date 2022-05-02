@@ -70,7 +70,7 @@ export const floorFSText = `
 
         /* Compute light fall off */
         vec4 lightDirection = uLightPos - wsPos;
-        float dot_nl = dot(normalize(lightDirection), vec4(0.0, 1.0, 0.0, 0.0));
+        float dot_nl = max(dot(normalize(lightDirection), vec4(0.0, 1.0, 0.0, 0.0)), 0.0);
 	    dot_nl = clamp(dot_nl, 0.0, 1.0);
 	
         gl_FragColor = vec4(clamp(dot_nl * color, 0.0, 1.0), 1.0);
