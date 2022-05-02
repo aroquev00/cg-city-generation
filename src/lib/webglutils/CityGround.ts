@@ -19,29 +19,29 @@ export class CityGround implements MaterialObject {
     // Build city model.
     this.cityModel = city;
 
+    city.streetsPos.forEach((streetNode, idx) => {
+      const x = streetNode[0];
+      const y = streetNode[1];
 
-    for (let x = 0; x < city.size; x++) {
-      for (let y = 0; y < city.size; y++) {
-        // Set up vertices and their normals.
-        // Left bottom edge. # 2
-        this.vertices.push(new Vec4([x, this.floorY, y, 1]));
-        this.norms.push(new Vec4([0, 1, 0, 1]));
-        // Right bottom edge. 3 1
-        this.vertices.push(new Vec4([x + 1, this.floorY, y, 1]));
-        this.norms.push(new Vec4([0, 1, 0, 1]));
-        // Left top edge. 1 3
-        this.vertices.push(new Vec4([x, this.floorY, y + 1, 1]));
-        this.norms.push(new Vec4([0, 1, 0, 1]));
-        // Right top edge. 2 #
-        this.vertices.push(new Vec4([x + 1, this.floorY, y + 1, 1]));
-        this.norms.push(new Vec4([0, 1, 0, 1]));
+      // Set up vertices and their normals.
+      // Left bottom edge. # 2
+      this.vertices.push(new Vec4([x, this.floorY, y, 1]));
+      this.norms.push(new Vec4([0, 1, 0, 1]));
+      // Right bottom edge. 3 1
+      this.vertices.push(new Vec4([x + 1, this.floorY, y, 1]));
+      this.norms.push(new Vec4([0, 1, 0, 1]));
+      // Left top edge. 1 3
+      this.vertices.push(new Vec4([x, this.floorY, y + 1, 1]));
+      this.norms.push(new Vec4([0, 1, 0, 1]));
+      // Right top edge. 2 #
+      this.vertices.push(new Vec4([x + 1, this.floorY, y + 1, 1]));
+      this.norms.push(new Vec4([0, 1, 0, 1]));
 
-        // Set up indices.
-        const iterNum = (x * city.size + y) * 4;
-        this.ind.push(new Vec3([iterNum + 2, iterNum + 3, iterNum + 1]));
-        this.ind.push(new Vec3([iterNum + 1, iterNum, iterNum + 2]));
-      }
-    }
+      // Set up indices.
+      const iterNum = idx * 4;
+      this.ind.push(new Vec3([iterNum + 2, iterNum + 3, iterNum + 1]));
+      this.ind.push(new Vec3([iterNum + 1, iterNum, iterNum + 2]));
+    });
 
     /* Flatten Position. */
     this.verticesF32 = new Float32Array(this.vertices.length * 4);
