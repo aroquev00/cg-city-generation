@@ -84,6 +84,7 @@ export class SkinningAnimation extends CanvasAnimation {
   /* Global Rendering Info */
   private lightPosition: Vec4;
   private backgroundColor: Vec4;
+  private lightRadians: number;
 
   private canvas2d: HTMLCanvasElement;
   private ctx2: CanvasRenderingContext2D | null;
@@ -102,7 +103,7 @@ export class SkinningAnimation extends CanvasAnimation {
     this.ctx = Debugger.makeDebugContext(this.ctx);
     let gl = this.ctx;
 
-    this.city = new City(20, "Downtown");
+    this.city = new City(100, "Downtown");
     this.cityGround = new CityGround(this.city);
 
     this.floor = new Floor();
@@ -115,11 +116,12 @@ export class SkinningAnimation extends CanvasAnimation {
     this.buildingRenderPass = new RenderPass(this.extVAO, gl, buildingVSText, buildingFSText);
 
     this.gui = new GUI(this.canvas2d, this);
-    this.lightPosition = new Vec4([-10, 10, -10, 1]);
+    this.lightRadians = 0;
+    this.lightPosition = new Vec4([50 * Math.cos(this.lightRadians), 100, 50 * Math.sin(this.lightRadians), 1]);
     this.backgroundColor = new Vec4([0.0, 0.37254903, 0.37254903, 1.0]);
 
     this.initFloor();
-    this.city = new City(40, "Downtown");
+    this.city = new City(20, "Downtown");
     this.cityGround = new CityGround(this.city)
 
     this.buildings = new Buildings(this.city);
@@ -473,7 +475,9 @@ export class SkinningAnimation extends CanvasAnimation {
   private drawScene(x: number, y: number, width: number, height: number): void {
     const gl: WebGLRenderingContext = this.ctx;
     gl.viewport(x, y, width, height);
-
+    this.lightRadians += .005;
+    this.lightPosition.x = 50 * Math.cos(this.lightRadians);
+    this.lightPosition.z = 50 * Math.sin(this.lightRadians);
     this.floorRenderPass.draw();
     this.buildingRenderPass.draw();
     
