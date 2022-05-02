@@ -126,7 +126,7 @@ export class SkinningAnimation extends CanvasAnimation {
     this.initCityGround()
 
     this.initFloor();
-    this.city = new City(40, "Downtown");
+    this.city = new City(20, "Downtown");
     this.cityGround = new CityGround(this.city)
 
     this.buildings = new Buildings(this.city);
