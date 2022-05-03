@@ -92,13 +92,14 @@ export const buildingVSText = `
     varying vec2 textureUV;
     varying vec4 color;
     varying vec3 norm;
+    varying float angle;
 
     void main () {
         textureUV = uv;
         norm = normal;
-        vec4 lightDir = lightPosition - vec4(vertPosition, 1.0);
-        color = vec4(.8, .8, .8, 1.0) * max(dot(normalize(lightDir), vec4(normal, 1.0)), 0.0);
-        color.w = 1.0;
+        color = vec4(.8, .8, .8, 1.0);
+        vec4 lightDir = normalize(lightPosition - vec4(vertPosition, 1.0));
+        angle = max(dot(lightDir, vec4(normal, 1.0)), 0.0);
         gl_Position = mProj * mView * mWorld * vec4(vertPosition, 1.0);
     }
 `;
@@ -107,9 +108,10 @@ export const buildingFSText = `
     precision mediump float;
 
     varying vec4 color;
+    varying float angle;
 
     void main() {
-        gl_FragColor = color;
+        gl_FragColor = color * angle;
     }
 `;
 
@@ -119,15 +121,17 @@ export const buildingTextureFSText = `
     varying vec4 color;
     varying vec2 textureUV;
     varying vec3 norm;
+    varying float angle;
 
     uniform sampler2D u_texture;
 
     void main() {
         if(norm.y == 1.0 || norm.y == -1.0) {
-            gl_FragColor = color;
+            gl_FragColor = color * angle;
         } else {
-            gl_FragColor = texture2D(u_texture, textureUV / 2.0);
+            gl_FragColor = angle * texture2D(u_texture, textureUV);
         }
+        gl_FragColor.w = 1.0;
     }
 `;
 
