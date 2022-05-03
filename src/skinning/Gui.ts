@@ -95,13 +95,16 @@ export class GUI implements IGUI {
    * Resets the state of the GUI
    */
   public reset(): void {
+    const cameraPosX = this.animation.city.size / 2;
+    const cameraHeight = this.animation.city.size;
+
     this.fps = false;
     this.dragging = false;
     this.time = 0;
     this.mode = Mode.edit;
     this.camera = new Camera(
-      new Vec3([10, 30, 10]),
-      new Vec3([10, 0, 10]),
+      new Vec3([cameraPosX, cameraHeight, cameraPosX]),
+      new Vec3([cameraPosX, 0, cameraPosX]),
       new Vec3([0, 0, 1]),
       45,
       this.width / this.viewPortHeight,
@@ -300,31 +303,39 @@ export class GUI implements IGUI {
   public onKeydown(key: KeyboardEvent): void {
     switch (key.code) {
       case "Digit1": {
-        this.animation.setScene("/static/assets/skinning/split_cube.dae");
+        this.animation.initCity(10);
         break;
       }
       case "Digit2": {
-        this.animation.setScene("/static/assets/skinning/long_cubes.dae");
+        this.animation.initCity(20);
         break;
       }
       case "Digit3": {
-        this.animation.setScene("/static/assets/skinning/simple_art.dae");
+        this.animation.initCity(30);
         break;
       }      
       case "Digit4": {
-        this.animation.setScene("/static/assets/skinning/mapped_cube.dae");
+        this.animation.initCity(40);
         break;
       }
       case "Digit5": {
-        this.animation.setScene("/static/assets/skinning/robot.dae");
+        this.animation.initCity(50);
         break;
       }
       case "Digit6": {
-        this.animation.setScene("/static/assets/skinning/head.dae");
+        this.animation.initCity(60);
         break;
       }
       case "Digit7": {
-        this.animation.setScene("/static/assets/skinning/wolf.dae");
+        this.animation.initCity(70);
+        break;
+      }
+      case "Digit8": {
+        this.animation.initCity(80);
+        break;
+      }
+      case "Digit9": {
+        this.animation.initCity(90);
         break;
       }
       case "KeyW": {

@@ -58,7 +58,7 @@ export class SkinningAnimation extends CanvasAnimation {
   private loadedScene: string;
 
   /* City Rendering Info */
-  private city: City;
+  public city: City;
   private cityGround: CityGround;
   private cityGroundRenderPass: RenderPass;
 
@@ -188,7 +188,6 @@ export class SkinningAnimation extends CanvasAnimation {
     //this.initModel();
     //this.initSkeleton();
     //this.initCylinder();
-    this.initBuildings();
     this.gui.reset();
   }
 
@@ -552,6 +551,19 @@ export class SkinningAnimation extends CanvasAnimation {
 
   public getGUI(): GUI {
     return this.gui;
+  }
+
+  /**
+   * Creates a new city.
+   * @param citySize The size of the new city. 
+   */
+  public initCity(citySize: number): void {
+    this.city = new City(citySize, "Downtown");
+    this.cityGround = new CityGround(this.city)
+    this.buildings = new Buildings(this.city);
+    this.initCityGround()
+    this.initBuildings();
+    this.gui.reset();
   }
   
   /**
