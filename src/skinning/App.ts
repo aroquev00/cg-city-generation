@@ -58,7 +58,7 @@ export class SkinningAnimation extends CanvasAnimation {
   private loadedScene: string;
 
   /* City Rendering Info */
-  private city: City;
+  public city: City;
   private cityGround: CityGround;
   private cityGroundRenderPass: RenderPass;
 

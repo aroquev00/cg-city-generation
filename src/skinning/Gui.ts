@@ -95,13 +95,16 @@ export class GUI implements IGUI {
    * Resets the state of the GUI
    */
   public reset(): void {
+    const cameraPosX = this.animation.city.size / 2;
+    const cameraHeight = this.animation.city.size;
+
     this.fps = false;
     this.dragging = false;
     this.time = 0;
     this.mode = Mode.edit;
     this.camera = new Camera(
-      new Vec3([10, 30, 10]),
-      new Vec3([10, 0, 10]),
+      new Vec3([cameraPosX, cameraHeight, cameraPosX]),
+      new Vec3([cameraPosX, 0, cameraPosX]),
       new Vec3([0, 0, 1]),
       45,
       this.width / this.viewPortHeight,
