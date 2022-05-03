@@ -49,6 +49,15 @@ export class Buildings {
         }
         return Float32Array.from(values);
     }
+
+    getUV(): Float32Array {
+        let values = [];
+        for (let i = 0;i < this.buildings.length;i++){
+            let b = this.buildings[i];
+            values.push(...b.uv);
+        }
+        return Float32Array.from(values);
+    }
 }
 
 
@@ -93,6 +102,44 @@ const cubeVerts = [
      0.0,  0.0,  1.0,
      0.0,  1.0,  1.0,
      0.0,  1.0,  0.0,
+];
+
+const cubeUV = [
+    // Front face
+     0.0,  0.0,
+     1.0,  0.0,
+     1.0,  1.0,
+     0.0,  1.0,
+  
+    // Back face
+     0.0,  0.0,
+     0.0,  1.0,
+     1.0,  1.0,
+     1.0,  0.0,
+  
+    // Top face
+     0.0, 0.0,
+     0.0, 1.0,
+     1.0, 1.0,
+     1.0, 0.0,
+  
+    // Bottom face
+     0.0, 0.0,
+     1.0, 0.0,
+     1.0, 1.0,
+     0.0, 1.0,
+  
+    // Right face
+     0.0,  0.0,
+     1.0,  0.0,
+     1.0,  1.0,
+     0.0,  1.0,
+  
+    // Left face
+     0.0,  0.0,
+     0.0,  1.0,
+     1.0,  1.0,
+     1.0,  0.0,
 ];
 
 const cubeIndices = [
@@ -154,6 +201,7 @@ class Building {
     vertices: number[];
     normals: number[];
     indices: number[];
+    uv: number[];
 
     // roof type variable?
 
@@ -177,6 +225,7 @@ class Building {
         this.vertices = clone;
         this.indices = [...cubeIndices];
         this.normals = [...cubeNormals];
+        this.uv = [...cubeUV];
     }
 }
 

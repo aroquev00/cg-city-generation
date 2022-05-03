@@ -20,7 +20,8 @@ import {
   sBackVSText,
   sBackFSText,
   buildingFSText,
-  buildingVSText
+  buildingVSText,
+  buildingTextureFSText
 } from "./Shaders.js";
 import { Mat4, Vec4, Vec3 } from "../lib/TSM.js";
 import { CLoader } from "./AnimationFileLoader.js";
@@ -192,10 +193,12 @@ export class SkinningAnimation extends CanvasAnimation {
   }
 
   public initBuildings(){
-
-    console.log(this.buildings.getIndices());
-    console.log(this.buildings.getVertices());
     this.buildingRenderPass.setIndexBufferData(this.buildings.getIndices());
+
+    this.buildingRenderPass.addTextureMap("windows.jpg", buildingVSText, buildingTextureFSText);
+
+    this.buildingRenderPass.addAttribute("uv", 2, this.ctx.FLOAT, false,
+        2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getUV());
 
     this.buildingRenderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
       3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getVertices());
