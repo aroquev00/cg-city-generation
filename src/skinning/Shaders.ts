@@ -87,10 +87,15 @@ export const buildingVSText = `
     
     attribute vec3 vertPosition;
     attribute vec3 normal;
-    
+    attribute vec2 uv;
+
+    varying vec2 textureUV;
     varying vec4 color;
+    varying vec3 norm;
 
     void main () {
+        textureUV = uv;
+        norm = normal;
         vec4 lightDir = lightPosition - vec4(vertPosition, 1.0);
         color = vec4(.8, .8, .8, 1.0) * max(dot(normalize(lightDir), vec4(normal, 1.0)), 0.0);
         color.w = 1.0;
@@ -105,6 +110,24 @@ export const buildingFSText = `
 
     void main() {
         gl_FragColor = color;
+    }
+`;
+
+export const buildingTextureFSText = `
+    precision mediump float;
+
+    varying vec4 color;
+    varying vec2 textureUV;
+    varying vec3 norm;
+
+    uniform sampler2D u_texture;
+
+    void main() {
+        if(norm.y == 1.0 || norm.y == -1.0) {
+            gl_FragColor = color;
+        } else {
+            gl_FragColor = texture2D(u_texture, textureUV / 2.0);
+        }
     }
 `;
 
