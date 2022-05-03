@@ -49,11 +49,9 @@ export class CityGround implements MaterialObject {
       this.verticesF32.set(v.xyzw, i * 4);
     });
     console.assert(this.verticesF32 != null);
-    console.assert(this.verticesF32.length === city.size ** 2 * 16);
 
     /* Set indices. */
     console.assert(this.ind != null);
-    console.assert(this.ind.length === city.size ** 2 * 2);
 
     /* Flatten Indices. */
     this.indicesU32 = new Uint32Array(this.ind.length * 3);
@@ -61,7 +59,6 @@ export class CityGround implements MaterialObject {
       this.indicesU32.set(v.xyz, i * 3);
     });
     console.assert(this.indicesU32 != null);
-    console.assert(this.indicesU32.length === city.size ** 2 * 2 * 3);
 
     /* Set Normals. */
     this.normalsF32 = new Float32Array(this.norms.length * 4);
@@ -71,12 +68,10 @@ export class CityGround implements MaterialObject {
   }
 
   public positions(): Vec4[] {
-    console.assert(this.vertices.length === this.cityModel.size ** 2);
     return this.vertices;
   }
 
   public positionsFlat(): Float32Array {
-    console.assert(this.verticesF32.length === this.cityModel.size ** 2 * 16);
     return this.verticesF32;
   }
 
@@ -95,12 +90,10 @@ export class CityGround implements MaterialObject {
   }
 
   public indices(): Vec3[] {
-    console.assert(this.ind.length === this.cityModel.size ** 2 * 2);
     return this.ind;
   }
 
   public indicesFlat(): Uint32Array {
-    console.assert(this.indicesU32.length === this.cityModel.size ** 2 * 6);
     return this.indicesU32;
   }
 
