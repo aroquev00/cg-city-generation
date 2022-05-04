@@ -142,6 +142,6 @@ export class CityGround implements MaterialObject {
 
   public getTextureSrc(): string {
     //return "skinning/minecraft_tree_wood.jpg";
-    return "cityGeneration/asphalt_road.jpg";
+    return "cityGeneration/street.jpg";
   }
 }
