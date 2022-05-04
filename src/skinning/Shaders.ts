@@ -7,13 +7,17 @@ export const cityGroundVSText = `
     uniform mat4 uProj;
 
     attribute vec4 aVertPos;
+    attribute vec2 aUV;
 
     varying vec4 vClipPos;
+    varying vec2 uv;
 
     void main () {
 
         gl_Position = uProj * uView * uWorld * aVertPos;
         vClipPos = gl_Position;
+
+        uv = aUV;
     }
 `;
 
@@ -25,9 +29,13 @@ export const cityGroundFSText = `
     uniform vec4 uLightPos;
 
     varying vec4 vClipPos;
+    varying vec2 uv;
+
+    uniform sampler2D u_texture;
 
     void main() {
-        gl_FragColor = vec4(0.0, .6, .2, 1.0);
+        gl_FragColor = texture2D(u_texture, uv);
+        //gl_FragColor = vec4(0.0, .6, .2, 1.0);
     }
 `;
 

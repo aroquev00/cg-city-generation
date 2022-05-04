@@ -1,7 +1,7 @@
 import { Debugger } from "../lib/webglutils/Debugging.js";
 import {
   CanvasAnimation,
-  WebGLUtilities
+  WebGLUtilities,
 } from "../lib/webglutils/CanvasAnimation.js";
 import { Floor } from "../lib/webglutils/Floor.js";
 import { GUI, Mode } from "./Gui.js";
@@ -20,7 +20,7 @@ import {
   sBackVSText,
   sBackFSText,
   buildingFSText,
-  buildingVSText
+  buildingVSText,
 } from "./Shaders.js";
 import { Mat4, Vec4, Vec3 } from "../lib/TSM.js";
 import { CLoader } from "./AnimationFileLoader.js";
@@ -92,7 +92,6 @@ export class SkinningAnimation extends CanvasAnimation {
   private canvas2d: HTMLCanvasElement;
   private ctx2: CanvasRenderingContext2D | null;
 
-
   constructor(canvas: HTMLCanvasElement) {
     super(canvas);
 
@@ -110,22 +109,57 @@ export class SkinningAnimation extends CanvasAnimation {
     this.cylinder = new Cylinder(10);
 
     this.city = new City(40, "Downtown");
-    this.cityGround = new CityGround(this.city)
+    this.cityGround = new CityGround(this.city);
 
-    this.cityGroundRenderPass = new RenderPass(this.extVAO, gl, cityGroundVSText, cityGroundFSText);
+    this.cityGroundRenderPass = new RenderPass(
+      this.extVAO,
+      gl,
+      cityGroundVSText,
+      cityGroundFSText
+    );
 
-    this.floorRenderPass = new RenderPass(this.extVAO, gl, floorVSText, floorFSText);
-    this.sceneRenderPass = new RenderPass(this.extVAO, gl, sceneVSText, sceneFSText);
-    this.skeletonRenderPass = new RenderPass(this.extVAO, gl, skeletonVSText, skeletonFSText);  
-    this.cylinderRenderPass = new RenderPass(this.extVAO, gl, cylinderVSText, cylinderFSText);  
-    this.buildingRenderPass = new RenderPass(this.extVAO, gl, buildingVSText, buildingFSText);
+    this.floorRenderPass = new RenderPass(
+      this.extVAO,
+      gl,
+      floorVSText,
+      floorFSText
+    );
+    this.sceneRenderPass = new RenderPass(
+      this.extVAO,
+      gl,
+      sceneVSText,
+      sceneFSText
+    );
+    this.skeletonRenderPass = new RenderPass(
+      this.extVAO,
+      gl,
+      skeletonVSText,
+      skeletonFSText
+    );
+    this.cylinderRenderPass = new RenderPass(
+      this.extVAO,
+      gl,
+      cylinderVSText,
+      cylinderFSText
+    );
+    this.buildingRenderPass = new RenderPass(
+      this.extVAO,
+      gl,
+      buildingVSText,
+      buildingFSText
+    );
 
     this.gui = new GUI(this.canvas2d, this);
     this.lightRadians = 0;
-    this.lightPosition = new Vec4([50 * Math.cos(this.lightRadians), 50, 50 * Math.sin(this.lightRadians), 1]);
+    this.lightPosition = new Vec4([
+      50 * Math.cos(this.lightRadians),
+      50,
+      50 * Math.sin(this.lightRadians),
+      1,
+    ]);
     this.backgroundColor = new Vec4([0.0, 0.37254903, 0.37254903, 1.0]);
 
-    this.initCityGround()
+    this.initCityGround();
 
     this.initFloor();
 
@@ -134,15 +168,17 @@ export class SkinningAnimation extends CanvasAnimation {
     this.scene = new CLoader("");
 
     // Status bar
-    this.sBackRenderPass = new RenderPass(this.extVAO, gl, sBackVSText, sBackFSText);
-    
-    
+    this.sBackRenderPass = new RenderPass(
+      this.extVAO,
+      gl,
+      sBackVSText,
+      sBackFSText
+    );
+
     // TODO
     // Other initialization, for instance, for the bone highlighting
-    
-    this.initGui();
 
-    
+    this.initGui();
 
     this.millis = new Date().getTime();
 
@@ -166,104 +202,219 @@ export class SkinningAnimation extends CanvasAnimation {
    * Setup the animation. This can be called again to reset the animation.
    */
   public reset(): void {
-      this.gui.reset();
-      this.setScene(this.loadedScene);
+    this.gui.reset();
+    this.setScene(this.loadedScene);
   }
 
   public initGui(): void {
-    
     // Status bar background
     let verts = new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]);
-    this.sBackRenderPass.setIndexBufferData(new Uint32Array([1, 0, 2, 2, 0, 3]))
-    this.sBackRenderPass.addAttribute("vertPosition", 2, this.ctx.FLOAT, false,
-      2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, verts);
+    this.sBackRenderPass.setIndexBufferData(
+      new Uint32Array([1, 0, 2, 2, 0, 3])
+    );
+    this.sBackRenderPass.addAttribute(
+      "vertPosition",
+      2,
+      this.ctx.FLOAT,
+      false,
+      2 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      verts
+    );
 
-    this.sBackRenderPass.setDrawData(this.ctx.TRIANGLES, 6, this.ctx.UNSIGNED_INT, 0);
+    this.sBackRenderPass.setDrawData(
+      this.ctx.TRIANGLES,
+      6,
+      this.ctx.UNSIGNED_INT,
+      0
+    );
     this.sBackRenderPass.setup();
-
-    }
+  }
 
   public initScene(): void {
-    if (this.scene.meshes.length === 0) { return; }
+    if (this.scene.meshes.length === 0) {
+      return;
+    }
     //this.initModel();
     //this.initSkeleton();
     //this.initCylinder();
     this.gui.reset();
   }
 
-  public initBuildings(){
-
+  public initBuildings() {
     console.log(this.buildings.getIndices());
     console.log(this.buildings.getVertices());
     this.buildingRenderPass.setIndexBufferData(this.buildings.getIndices());
 
-    this.buildingRenderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
-      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getVertices());
-    
-      this.buildingRenderPass.addAttribute("normal", 3, this.ctx.FLOAT, false,
-      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getNormals());
+    this.buildingRenderPass.addAttribute(
+      "vertPosition",
+      3,
+      this.ctx.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.buildings.getVertices()
+    );
 
-    this.buildingRenderPass.addUniform("mWorld",
+    this.buildingRenderPass.addAttribute(
+      "normal",
+      3,
+      this.ctx.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.buildings.getNormals()
+    );
+
+    this.buildingRenderPass.addUniform(
+      "mWorld",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(new Mat4().setIdentity().all()));        
-    });
-    this.buildingRenderPass.addUniform("mProj",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(new Mat4().setIdentity().all())
+        );
+      }
+    );
+    this.buildingRenderPass.addUniform(
+      "mProj",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().all()));
-    });
-    this.buildingRenderPass.addUniform("mView",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.projMatrix().all())
+        );
+      }
+    );
+    this.buildingRenderPass.addUniform(
+      "mView",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().all()));
-    });
-    this.buildingRenderPass.addUniform("lightPosition",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.viewMatrix().all())
+        );
+      }
+    );
+    this.buildingRenderPass.addUniform(
+      "lightPosition",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniform4fv(loc, this.lightPosition.xyzw);
-    });
+      }
+    );
 
-    this.buildingRenderPass.setDrawData(this.ctx.TRIANGLES, this.buildings.getIndices().length, this.ctx.UNSIGNED_INT, 0);
+    this.buildingRenderPass.setDrawData(
+      this.ctx.TRIANGLES,
+      this.buildings.getIndices().length,
+      this.ctx.UNSIGNED_INT,
+      0
+    );
     this.buildingRenderPass.setup();
   }
 
   public initCylinder(): void {
     this.cylinderRenderPass.setIndexBufferData(this.cylinder.indicesFlatMap());
 
-    this.cylinderRenderPass.addAttribute("vertPosition", 2, this.ctx.FLOAT, false,
-      2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.cylinder.positionsFlatMap());
-    
-    this.cylinderRenderPass.addUniform("mWorld",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(new Mat4().setIdentity().all()));        
-    });
-    this.cylinderRenderPass.addUniform("mProj",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().all()));
-    });
-    this.cylinderRenderPass.addUniform("mView",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().all()));
-    });
+    this.cylinderRenderPass.addAttribute(
+      "vertPosition",
+      2,
+      this.ctx.FLOAT,
+      false,
+      2 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.cylinder.positionsFlatMap()
+    );
 
-    this.cylinderRenderPass.addUniform("initialTrans",
+    this.cylinderRenderPass.addUniform(
+      "mWorld",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix3fv(loc, false, new Float32Array(this.getScene().meshes[0].bones[getHighlightedBoneIndex()].initialTransformation.toMat3().all()));
-    });
-
-    this.cylinderRenderPass.addUniform("bTrans",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(new Mat4().setIdentity().all())
+        );
+      }
+    );
+    this.cylinderRenderPass.addUniform(
+      "mProj",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniform3fv(loc, this.getScene().meshes[0].bones[getHighlightedBoneIndex()].position.xyz);
-    });
-
-    this.cylinderRenderPass.addUniform("bRot",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.projMatrix().all())
+        );
+      }
+    );
+    this.cylinderRenderPass.addUniform(
+      "mView",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniform4fv(loc, this.getScene().meshes[0].bones[getHighlightedBoneIndex()].rotation.xyzw);
-    });
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.viewMatrix().all())
+        );
+      }
+    );
 
-    this.cylinderRenderPass.addUniform("length",
+    this.cylinderRenderPass.addUniform(
+      "initialTrans",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniform1f(loc, this.getScene().meshes[0].bones[getHighlightedBoneIndex()].length);
-    });
+        gl.uniformMatrix3fv(
+          loc,
+          false,
+          new Float32Array(
+            this.getScene()
+              .meshes[0].bones[
+                getHighlightedBoneIndex()
+              ].initialTransformation.toMat3()
+              .all()
+          )
+        );
+      }
+    );
 
-    this.cylinderRenderPass.setDrawData(this.ctx.LINES, this.cylinder.indicesFlatMap().length, this.ctx.UNSIGNED_INT, 0);
+    this.cylinderRenderPass.addUniform(
+      "bTrans",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniform3fv(
+          loc,
+          this.getScene().meshes[0].bones[getHighlightedBoneIndex()].position
+            .xyz
+        );
+      }
+    );
+
+    this.cylinderRenderPass.addUniform(
+      "bRot",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniform4fv(
+          loc,
+          this.getScene().meshes[0].bones[getHighlightedBoneIndex()].rotation
+            .xyzw
+        );
+      }
+    );
+
+    this.cylinderRenderPass.addUniform(
+      "length",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniform1f(
+          loc,
+          this.getScene().meshes[0].bones[getHighlightedBoneIndex()].length
+        );
+      }
+    );
+
+    this.cylinderRenderPass.setDrawData(
+      this.ctx.LINES,
+      this.cylinder.indicesFlatMap().length,
+      this.ctx.UNSIGNED_INT,
+      0
+    );
     this.cylinderRenderPass.setup();
   }
 
@@ -271,10 +422,19 @@ export class SkinningAnimation extends CanvasAnimation {
    * Sets up the mesh and mesh drawing
    */
   public initModel(): void {
-    this.sceneRenderPass = new RenderPass(this.extVAO, this.ctx, sceneVSText, sceneFSText);
-    
+    this.sceneRenderPass = new RenderPass(
+      this.extVAO,
+      this.ctx,
+      sceneVSText,
+      sceneFSText
+    );
+
     if (this.scene.meshes[0].imgSrc !== null) {
-      this.sceneRenderPass.addTextureMap(this.scene.meshes[0].imgSrc, sceneVSText, sceneTextureFSText);
+      this.sceneRenderPass.addTextureMap(
+        this.scene.meshes[0].imgSrc,
+        sceneVSText,
+        sceneTextureFSText
+      );
     }
 
     let faceCount = this.scene.meshes[0].geometry.position.count / 3;
@@ -283,59 +443,168 @@ export class SkinningAnimation extends CanvasAnimation {
       fIndices[i] = i;
       fIndices[i + 1] = i + 1;
       fIndices[i + 2] = i + 2;
-    }    
+    }
     this.sceneRenderPass.setIndexBufferData(fIndices);
 
-    this.sceneRenderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
-      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].geometry.position.values);
-    this.sceneRenderPass.addAttribute("aNorm", 3, this.ctx.FLOAT, false,
-      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].geometry.normal.values);
+    this.sceneRenderPass.addAttribute(
+      "vertPosition",
+      3,
+      this.ctx.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].geometry.position.values
+    );
+    this.sceneRenderPass.addAttribute(
+      "aNorm",
+      3,
+      this.ctx.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].geometry.normal.values
+    );
     if (this.scene.meshes[0].geometry.uv) {
-      this.sceneRenderPass.addAttribute("aUV", 2, this.ctx.FLOAT, false,
-        2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].geometry.uv.values);
+      this.sceneRenderPass.addAttribute(
+        "aUV",
+        2,
+        this.ctx.FLOAT,
+        false,
+        2 * Float32Array.BYTES_PER_ELEMENT,
+        0,
+        undefined,
+        this.scene.meshes[0].geometry.uv.values
+      );
     } else {
-      this.sceneRenderPass.addAttribute("aUV", 2, this.ctx.FLOAT, false,
-        2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, new Float32Array(this.scene.meshes[0].geometry.normal.values.length));
+      this.sceneRenderPass.addAttribute(
+        "aUV",
+        2,
+        this.ctx.FLOAT,
+        false,
+        2 * Float32Array.BYTES_PER_ELEMENT,
+        0,
+        undefined,
+        new Float32Array(this.scene.meshes[0].geometry.normal.values.length)
+      );
     }
-    this.sceneRenderPass.addAttribute("skinIndices", 4, this.ctx.FLOAT, false,
-      4 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].geometry.skinIndex.values);
-    this.sceneRenderPass.addAttribute("skinWeights", 4, this.ctx.FLOAT, false,
-      4 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].geometry.skinWeight.values);
-    this.sceneRenderPass.addAttribute("v0", 3, this.ctx.FLOAT, false,
-      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].geometry.v0.values);
-    this.sceneRenderPass.addAttribute("v1", 3, this.ctx.FLOAT, false,
-      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].geometry.v1.values);
-    this.sceneRenderPass.addAttribute("v2", 3, this.ctx.FLOAT, false,
-      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].geometry.v2.values);
-    this.sceneRenderPass.addAttribute("v3", 3, this.ctx.FLOAT, false,
-      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].geometry.v3.values);
+    this.sceneRenderPass.addAttribute(
+      "skinIndices",
+      4,
+      this.ctx.FLOAT,
+      false,
+      4 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].geometry.skinIndex.values
+    );
+    this.sceneRenderPass.addAttribute(
+      "skinWeights",
+      4,
+      this.ctx.FLOAT,
+      false,
+      4 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].geometry.skinWeight.values
+    );
+    this.sceneRenderPass.addAttribute(
+      "v0",
+      3,
+      this.ctx.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].geometry.v0.values
+    );
+    this.sceneRenderPass.addAttribute(
+      "v1",
+      3,
+      this.ctx.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].geometry.v1.values
+    );
+    this.sceneRenderPass.addAttribute(
+      "v2",
+      3,
+      this.ctx.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].geometry.v2.values
+    );
+    this.sceneRenderPass.addAttribute(
+      "v3",
+      3,
+      this.ctx.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].geometry.v3.values
+    );
 
-    this.sceneRenderPass.addUniform("lightPosition",
+    this.sceneRenderPass.addUniform(
+      "lightPosition",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniform4fv(loc, this.lightPosition.xyzw);
-    });
-    this.sceneRenderPass.addUniform("mWorld",
+      }
+    );
+    this.sceneRenderPass.addUniform(
+      "mWorld",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(new Mat4().setIdentity().all()));        
-    });
-    this.sceneRenderPass.addUniform("mProj",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(new Mat4().setIdentity().all())
+        );
+      }
+    );
+    this.sceneRenderPass.addUniform(
+      "mProj",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().all()));
-    });
-    this.sceneRenderPass.addUniform("mView",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.projMatrix().all())
+        );
+      }
+    );
+    this.sceneRenderPass.addUniform(
+      "mView",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().all()));
-    });
-    this.sceneRenderPass.addUniform("jTrans",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {        
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.viewMatrix().all())
+        );
+      }
+    );
+    this.sceneRenderPass.addUniform(
+      "jTrans",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniform3fv(loc, this.scene.meshes[0].getBoneTranslations());
-    });
-    this.sceneRenderPass.addUniform("jRots",
+      }
+    );
+    this.sceneRenderPass.addUniform(
+      "jRots",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniform4fv(loc, this.scene.meshes[0].getBoneRotations());
-    });
+      }
+    );
 
-    this.sceneRenderPass.setDrawData(this.ctx.TRIANGLES, this.scene.meshes[0].geometry.position.count, this.ctx.UNSIGNED_INT, 0);
+    this.sceneRenderPass.setDrawData(
+      this.ctx.TRIANGLES,
+      this.scene.meshes[0].geometry.position.count,
+      this.ctx.UNSIGNED_INT,
+      0
+    );
     this.sceneRenderPass.setup();
   }
 
@@ -343,37 +612,77 @@ export class SkinningAnimation extends CanvasAnimation {
    * Sets up the skeleton drawing
    */
   public initSkeleton(): void {
-    this.skeletonRenderPass.setIndexBufferData(this.scene.meshes[0].getBoneIndices());
+    this.skeletonRenderPass.setIndexBufferData(
+      this.scene.meshes[0].getBoneIndices()
+    );
 
-    this.skeletonRenderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
-      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].getBonePositions());
+    this.skeletonRenderPass.addAttribute(
+      "vertPosition",
+      3,
+      this.ctx.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].getBonePositions()
+    );
 
-    this.skeletonRenderPass.addAttribute("boneIndex", 1, this.ctx.FLOAT, false,
-      1 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.scene.meshes[0].getBoneIndexAttribute());
+    this.skeletonRenderPass.addAttribute(
+      "boneIndex",
+      1,
+      this.ctx.FLOAT,
+      false,
+      1 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.scene.meshes[0].getBoneIndexAttribute()
+    );
 
-    this.skeletonRenderPass.addUniform("mWorld",
+    this.skeletonRenderPass.addUniform(
+      "mWorld",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniformMatrix4fv(loc, false, new Float32Array(Mat4.identity.all()));
-    });
-    this.skeletonRenderPass.addUniform("mProj",
+      }
+    );
+    this.skeletonRenderPass.addUniform(
+      "mProj",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().all()));
-    });
-    this.skeletonRenderPass.addUniform("mView",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.projMatrix().all())
+        );
+      }
+    );
+    this.skeletonRenderPass.addUniform(
+      "mView",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().all()));
-    });
-    this.skeletonRenderPass.addUniform("bTrans",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.viewMatrix().all())
+        );
+      }
+    );
+    this.skeletonRenderPass.addUniform(
+      "bTrans",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniform3fv(loc, this.getScene().meshes[0].getBoneTranslations());
-    });
-    this.skeletonRenderPass.addUniform("bRots",
+      }
+    );
+    this.skeletonRenderPass.addUniform(
+      "bRots",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniform4fv(loc, this.getScene().meshes[0].getBoneRotations());
-    });
+      }
+    );
 
-    this.skeletonRenderPass.setDrawData(this.ctx.LINES,
-      this.scene.meshes[0].getBoneIndices().length, this.ctx.UNSIGNED_INT, 0);
+    this.skeletonRenderPass.setDrawData(
+      this.ctx.LINES,
+      this.scene.meshes[0].getBoneIndices().length,
+      this.ctx.UNSIGNED_INT,
+      0
+    );
     this.skeletonRenderPass.setup();
   }
 
@@ -381,8 +690,11 @@ export class SkinningAnimation extends CanvasAnimation {
    * Sets up the city ground drawing
    */
   public initCityGround(): void {
+    this.cityGroundRenderPass.addTextureMap(this.cityGround.getTextureSrc());
+
     this.cityGroundRenderPass.setIndexBufferData(this.cityGround.indicesFlat());
-    this.cityGroundRenderPass.addAttribute("aVertPos",
+    this.cityGroundRenderPass.addAttribute(
+      "aVertPos",
       4,
       this.ctx.FLOAT,
       false,
@@ -392,41 +704,86 @@ export class SkinningAnimation extends CanvasAnimation {
       this.cityGround.positionsFlat()
     );
 
-    this.cityGroundRenderPass.addUniform("uLightPos",
+    this.cityGroundRenderPass.addAttribute(
+      "aUV",
+      2,
+      this.ctx.FLOAT,
+      false,
+      2 * Float32Array.BYTES_PER_ELEMENT,
+      0,
+      undefined,
+      this.cityGround.getUVValuesFlat()
+    );
+
+    this.cityGroundRenderPass.addUniform(
+      "uLightPos",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniform4fv(loc, this.lightPosition.xyzw);
-    });
-    this.cityGroundRenderPass.addUniform("uWorld",
+      }
+    );
+    this.cityGroundRenderPass.addUniform(
+      "uWorld",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniformMatrix4fv(loc, false, new Float32Array(Mat4.identity.all()));
-    });
-    this.cityGroundRenderPass.addUniform("uProj",
+      }
+    );
+    this.cityGroundRenderPass.addUniform(
+      "uProj",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().all()));
-    });
-    this.cityGroundRenderPass.addUniform("uView",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.projMatrix().all())
+        );
+      }
+    );
+    this.cityGroundRenderPass.addUniform(
+      "uView",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().all()));
-    });
-    this.cityGroundRenderPass.addUniform("uProjInv",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.viewMatrix().all())
+        );
+      }
+    );
+    this.cityGroundRenderPass.addUniform(
+      "uProjInv",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().inverse().all()));
-    });
-    this.cityGroundRenderPass.addUniform("uViewInv",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.projMatrix().inverse().all())
+        );
+      }
+    );
+    this.cityGroundRenderPass.addUniform(
+      "uViewInv",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().inverse().all()));
-    });
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.viewMatrix().inverse().all())
+        );
+      }
+    );
 
-    this.cityGroundRenderPass.setDrawData(this.ctx.TRIANGLES, this.cityGround.indicesFlat().length, this.ctx.UNSIGNED_INT, 0);
+    this.cityGroundRenderPass.setDrawData(
+      this.ctx.TRIANGLES,
+      this.cityGround.indicesFlat().length,
+      this.ctx.UNSIGNED_INT,
+      0
+    );
     this.cityGroundRenderPass.setup();
   }
-  
+
   /**
    * Sets up the floor drawing
    */
   public initFloor(): void {
     this.floorRenderPass.setIndexBufferData(this.floor.indicesFlat());
-    this.floorRenderPass.addAttribute("aVertPos",
+    this.floorRenderPass.addAttribute(
+      "aVertPos",
       4,
       this.ctx.FLOAT,
       false,
@@ -436,35 +793,67 @@ export class SkinningAnimation extends CanvasAnimation {
       this.floor.positionsFlat()
     );
 
-    this.floorRenderPass.addUniform("uLightPos",
+    this.floorRenderPass.addUniform(
+      "uLightPos",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniform4fv(loc, this.lightPosition.xyzw);
-    });
-    this.floorRenderPass.addUniform("uWorld",
+      }
+    );
+    this.floorRenderPass.addUniform(
+      "uWorld",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
         gl.uniformMatrix4fv(loc, false, new Float32Array(Mat4.identity.all()));
-    });
-    this.floorRenderPass.addUniform("uProj",
+      }
+    );
+    this.floorRenderPass.addUniform(
+      "uProj",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().all()));
-    });
-    this.floorRenderPass.addUniform("uView",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.projMatrix().all())
+        );
+      }
+    );
+    this.floorRenderPass.addUniform(
+      "uView",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().all()));
-    });
-    this.floorRenderPass.addUniform("uProjInv",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.viewMatrix().all())
+        );
+      }
+    );
+    this.floorRenderPass.addUniform(
+      "uProjInv",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.projMatrix().inverse().all()));
-    });
-    this.floorRenderPass.addUniform("uViewInv",
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.projMatrix().inverse().all())
+        );
+      }
+    );
+    this.floorRenderPass.addUniform(
+      "uViewInv",
       (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(this.gui.viewMatrix().inverse().all()));
-    });
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.viewMatrix().inverse().all())
+        );
+      }
+    );
 
-    this.floorRenderPass.setDrawData(this.ctx.TRIANGLES, this.floor.indicesFlat().length, this.ctx.UNSIGNED_INT, 0);
+    this.floorRenderPass.setDrawData(
+      this.ctx.TRIANGLES,
+      this.floor.indicesFlat().length,
+      this.ctx.UNSIGNED_INT,
+      0
+    );
     this.floorRenderPass.setup();
   }
-
 
   /** @internal
    * Draws a single frame
@@ -484,19 +873,28 @@ export class SkinningAnimation extends CanvasAnimation {
       let kfIndex = Math.floor(this.getGUI().getTime());
       let interpolationTime = this.getGUI().getTime() % 1;
       for (let parentIndex of Keyframe.parentIndices) {
-        interpolateSkeleton(this.scene.meshes[0], parentIndex, this.keyframes[kfIndex], this.keyframes[kfIndex + 1], interpolationTime);
+        interpolateSkeleton(
+          this.scene.meshes[0],
+          parentIndex,
+          this.keyframes[kfIndex],
+          this.keyframes[kfIndex + 1],
+          interpolationTime
+        );
       }
     }
-    
+
     // draw the status message
     if (this.ctx2) {
-      this.ctx2.clearRect(0, 0, this.ctx2.canvas.width, this.ctx2.canvas.height);
+      this.ctx2.clearRect(
+        0,
+        0,
+        this.ctx2.canvas.width,
+        this.ctx2.canvas.height
+      );
       if (this.scene.meshes.length > 0) {
         this.ctx2.fillText(this.getGUI().getModeString(), 50, 710);
       }
     }
-
-
 
     // Drawing
     const gl: WebGLRenderingContext = this.ctx;
@@ -509,30 +907,26 @@ export class SkinningAnimation extends CanvasAnimation {
     gl.cullFace(gl.BACK);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); // null is the default frame buffer
-    this.drawScene(0, 200, 800, 600);    
+    this.drawScene(0, 200, 800, 600);
 
     /* Draw status bar */
     if (this.scene.meshes.length > 0) {
       gl.viewport(0, 0, 800, 200);
-      this.sBackRenderPass.draw();      
-    }    
-
+      this.sBackRenderPass.draw();
+    }
   }
 
   private drawScene(x: number, y: number, width: number, height: number): void {
     const gl: WebGLRenderingContext = this.ctx;
     gl.viewport(x, y, width, height);
-    this.lightRadians += .002;
+    this.lightRadians += 0.002;
     this.lightPosition.x = 50 * Math.cos(this.lightRadians);
     this.lightPosition.z = 50 * Math.sin(this.lightRadians);
     this.floorRenderPass.draw();
 
-
     this.cityGroundRenderPass.draw();
 
     this.buildingRenderPass.draw();
-
-    
 
     /* Draw Scene */
     /*if (this.scene.meshes.length > 0) {
@@ -555,17 +949,17 @@ export class SkinningAnimation extends CanvasAnimation {
 
   /**
    * Creates a new city.
-   * @param citySize The size of the new city. 
+   * @param citySize The size of the new city.
    */
   public initCity(citySize: number): void {
     this.city = new City(citySize, "Downtown");
-    this.cityGround = new CityGround(this.city)
+    this.cityGround = new CityGround(this.city);
     this.buildings = new Buildings(this.city);
-    this.initCityGround()
+    this.initCityGround();
     this.initBuildings();
     this.gui.reset();
   }
-  
+
   /**
    * Loads and sets the scene from a Collada file
    * @param fileLocation URI for the Collada file
