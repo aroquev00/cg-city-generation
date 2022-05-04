@@ -21,6 +21,7 @@ import {
   sBackFSText,
   buildingFSText,
   buildingVSText,
+  buildingTextureFSText
 } from "./Shaders.js";
 import { Mat4, Vec4, Vec3 } from "../lib/TSM.js";
 import { CLoader } from "./AnimationFileLoader.js";
@@ -242,32 +243,19 @@ export class SkinningAnimation extends CanvasAnimation {
     this.gui.reset();
   }
 
-  public initBuildings() {
-    console.log(this.buildings.getIndices());
-    console.log(this.buildings.getVertices());
+  public initBuildings(){
     this.buildingRenderPass.setIndexBufferData(this.buildings.getIndices());
 
-    this.buildingRenderPass.addAttribute(
-      "vertPosition",
-      3,
-      this.ctx.FLOAT,
-      false,
-      3 * Float32Array.BYTES_PER_ELEMENT,
-      0,
-      undefined,
-      this.buildings.getVertices()
-    );
+    this.buildingRenderPass.addTextureMap("windows.jpg", buildingVSText, buildingTextureFSText);
 
-    this.buildingRenderPass.addAttribute(
-      "normal",
-      3,
-      this.ctx.FLOAT,
-      false,
-      3 * Float32Array.BYTES_PER_ELEMENT,
-      0,
-      undefined,
-      this.buildings.getNormals()
-    );
+    this.buildingRenderPass.addAttribute("uv", 2, this.ctx.FLOAT, false,
+        2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getUV());
+
+    this.buildingRenderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
+      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getVertices());
+    
+      this.buildingRenderPass.addAttribute("normal", 3, this.ctx.FLOAT, false,
+      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getNormals());
 
     this.buildingRenderPass.addUniform(
       "mWorld",
