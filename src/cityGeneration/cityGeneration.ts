@@ -29,9 +29,11 @@ class RoadBuilder {
 
 class CityNode {
   public type: GroundType;
+  public direction: Direction
 
   constructor(type: GroundType) {
     this.type = type;
+    this.direction = null;
   }
 }
 
@@ -81,6 +83,7 @@ export class City {
       new RoadBuilder(Math.floor(this.size / 2), 0, Direction.North)
     );
     this.map[Math.floor(this.size / 2)][0].type = GroundType.Street;
+    this.map[Math.floor(this.size / 2)][0].direction = Direction.North;
 
     // Build loop.
     while (this.queue.length > 0) {
@@ -103,6 +106,7 @@ export class City {
           // It is a valid road position.
           this.queue.push(mainBuilder);
           this.map[mainBuilder.x][mainBuilder.y].type = GroundType.Street;
+          this.map[mainBuilder.x][mainBuilder.y].direction = mainBuilder.direction;
         } else {
           // Check if there is a no dead end rule.
           if (!this.rules.allowDeadEnd()) {
@@ -114,6 +118,7 @@ export class City {
               if (this.isValidRoadPosition(mainBuilder)) {
                 this.queue.push(mainBuilder);
                 this.map[mainBuilder.x][mainBuilder.y].type = GroundType.Street;
+                this.map[mainBuilder.x][mainBuilder.y].direction = mainBuilder.direction;
                 break;
               }
             }
@@ -397,6 +402,7 @@ export class City {
     if (this.isValidRoadPosition(newBuilder)) {
       this.queue.push(newBuilder);
       this.map[newBuilder.x][newBuilder.y].type = GroundType.Street;
+      this.map[newBuilder.x][newBuilder.y].direction = newBuilder.direction;
     }
   }
 

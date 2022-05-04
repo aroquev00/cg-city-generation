@@ -246,7 +246,7 @@ export class SkinningAnimation extends CanvasAnimation {
   public initBuildings(){
     this.buildingRenderPass.setIndexBufferData(this.buildings.getIndices());
 
-    this.buildingRenderPass.addTextureMap("windows.jpg", buildingVSText, buildingTextureFSText);
+    this.buildingRenderPass.addTextureMap("cityGeneration/windows.jpg", buildingVSText, buildingTextureFSText);
 
     this.buildingRenderPass.addAttribute("uv", 2, this.ctx.FLOAT, false,
         2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getUV());

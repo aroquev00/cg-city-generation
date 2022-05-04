@@ -2,6 +2,7 @@ import { Mat4, Vec2, Vec3, Vec4 } from "../TSM.js";
 import { MaterialObject } from "./Objects.js";
 
 import { City } from "../../cityGeneration/cityGeneration.js";
+import { Direction } from "../../cityGeneration/cityEnums.js";
 
 export class CityGround implements MaterialObject {
   private cityModel: City;
@@ -29,22 +30,42 @@ export class CityGround implements MaterialObject {
       // Left bottom edge. # 2
       this.vertices.push(new Vec4([x, this.floorY, y, 1]));
       this.norms.push(new Vec4([0, 1, 0, 1]));
-      this.uvs.push(new Vec2([0, 0]));
+      this.uvs.push(
+        this.cityModel.map[x][y].direction === Direction.North ||
+          this.cityModel.map[x][y].direction === Direction.South
+          ? new Vec2([0, 0])
+          : new Vec2([1, 0])
+      );
 
       // Right bottom edge. 3 1
       this.vertices.push(new Vec4([x + 1, this.floorY, y, 1]));
       this.norms.push(new Vec4([0, 1, 0, 1]));
-      this.uvs.push(new Vec2([1, 0]));
+      this.uvs.push(
+        this.cityModel.map[x][y].direction === Direction.North ||
+          this.cityModel.map[x][y].direction === Direction.South
+          ? new Vec2([1, 0])
+          : new Vec2([1, 1])
+      );
 
       // Left top edge. 1 3
       this.vertices.push(new Vec4([x, this.floorY, y + 1, 1]));
       this.norms.push(new Vec4([0, 1, 0, 1]));
-      this.uvs.push(new Vec2([0, 1]));
+      this.uvs.push(
+        this.cityModel.map[x][y].direction === Direction.North ||
+          this.cityModel.map[x][y].direction === Direction.South
+          ? new Vec2([0, 1])
+          : new Vec2([0, 0])
+      );
 
       // Right top edge. 2 #
       this.vertices.push(new Vec4([x + 1, this.floorY, y + 1, 1]));
       this.norms.push(new Vec4([0, 1, 0, 1]));
-      this.uvs.push(new Vec2([1, 1]));
+      this.uvs.push(
+        this.cityModel.map[x][y].direction === Direction.North ||
+          this.cityModel.map[x][y].direction === Direction.South
+          ? new Vec2([1, 1])
+          : new Vec2([0, 1])
+      );
 
       // Set up indices.
       const iterNum = idx * 4;
@@ -142,6 +163,6 @@ export class CityGround implements MaterialObject {
 
   public getTextureSrc(): string {
     //return "skinning/minecraft_tree_wood.jpg";
-    return "cityGeneration/asphalt_road.jpg";
+    return "cityGeneration/street.jpg";
   }
 }
