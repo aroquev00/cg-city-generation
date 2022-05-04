@@ -1,4 +1,4 @@
-import { Mat4, Vec3, Vec4 } from "../TSM.js";
+import { Mat4, Vec2, Vec3, Vec4 } from "../TSM.js";
 import { MaterialObject } from "./Objects.js";
 
 import { City } from "../../cityGeneration/cityGeneration.js";
@@ -10,10 +10,12 @@ export class CityGround implements MaterialObject {
   private vertices: Vec4[] = [];
   private ind: Vec3[] = [];
   private norms: Vec4[] = [];
+  private uvs: Vec2[] = [];
 
   private verticesF32: Float32Array;
   private indicesU32: Uint32Array;
   private normalsF32: Float32Array;
+  private uvsF32: Float32Array;
 
   constructor(city: City) {
     // Build city model.
@@ -23,19 +25,26 @@ export class CityGround implements MaterialObject {
       const x = streetNode[0];
       const y = streetNode[1];
 
-      // Set up vertices and their normals.
+      // Set up vertices, their normals, and UV values.
       // Left bottom edge. # 2
       this.vertices.push(new Vec4([x, this.floorY, y, 1]));
       this.norms.push(new Vec4([0, 1, 0, 1]));
+      this.uvs.push(new Vec2([0, 0]));
+
       // Right bottom edge. 3 1
       this.vertices.push(new Vec4([x + 1, this.floorY, y, 1]));
       this.norms.push(new Vec4([0, 1, 0, 1]));
+      this.uvs.push(new Vec2([1, 0]));
+
       // Left top edge. 1 3
       this.vertices.push(new Vec4([x, this.floorY, y + 1, 1]));
       this.norms.push(new Vec4([0, 1, 0, 1]));
+      this.uvs.push(new Vec2([0, 1]));
+
       // Right top edge. 2 #
       this.vertices.push(new Vec4([x + 1, this.floorY, y + 1, 1]));
       this.norms.push(new Vec4([0, 1, 0, 1]));
+      this.uvs.push(new Vec2([1, 1]));
 
       // Set up indices.
       const iterNum = idx * 4;
@@ -64,6 +73,15 @@ export class CityGround implements MaterialObject {
     this.normalsF32 = new Float32Array(this.norms.length * 4);
     this.norms.forEach((v: Vec4, i: number) => {
       this.normalsF32.set(v.xyzw, i * 4);
+    });
+
+    /* Set UVs. */
+    console.assert(this.uvs != null);
+
+    /* Flatten UVs. */
+    this.uvsF32 = new Float32Array(this.uvs.length * 2);
+    this.uvs.forEach((v: Vec2, i: number) => {
+      this.uvsF32.set(v.xy, i * 2);
     });
   }
 
@@ -116,5 +134,14 @@ export class CityGround implements MaterialObject {
 
   public normalsFlat(): Float32Array {
     return this.normalsF32;
+  }
+
+  public getUVValuesFlat(): Float32Array {
+    return this.uvsF32;
+  }
+
+  public getTextureSrc(): string {
+    //return "skinning/minecraft_tree_wood.jpg";
+    return "cityGeneration/asphalt_road.jpg";
   }
 }
