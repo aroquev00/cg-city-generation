@@ -55,39 +55,39 @@
     "movementActionRules": [
       {
         "action": "CS",
-        "probability": 0.91
+        "probability": 0.95
       },
       {
         "action": "TR",
-        "probability": 0.04
+        "probability": 0.01
       },
       {
         "action": "TL",
-        "probability": 0.04
+        "probability": 0.01
       },
       {
         "action": "STOP",
-        "probability": 0.01
+        "probability": 0.03
       }
     ],
     "branchOutRules": [
       {
         "action": "doBranchOut",
-        "probability": 0.13
+        "probability": 0.15
       },
       {
         "action": "doNotBranchOut",
-        "probability": 0.87
+        "probability": 0.85
       }
     ],
     "crossIntersectionRules": [
       {
         "action": "doCrossIntersection",
-        "probability": 0.1
+        "probability": 0.05
       },
       {
         "action": "doNotCrossIntersection",
-        "probability": 0.9
+        "probability": 0.95
       }
     ],
     "deadEndRules": [
