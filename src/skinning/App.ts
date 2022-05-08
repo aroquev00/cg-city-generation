@@ -939,8 +939,8 @@ export class SkinningAnimation extends CanvasAnimation {
    * Creates a new city.
    * @param citySize The size of the new city.
    */
-  public initCity(citySize: number): void {
-    this.city = new City(citySize, "Residential");
+  public initCity(citySize: number, cityType: string): void {
+    this.city = new City(citySize, cityType);
     this.cityGround = new CityGround(this.city);
     this.buildings = new Buildings(this.city);
     this.initCityGround();
