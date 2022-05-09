@@ -109,7 +109,7 @@ export class SkinningAnimation extends CanvasAnimation {
     this.floor = new Floor();
     this.cylinder = new Cylinder(10);
 
-    this.city = new City(40, "Downtown");
+    this.city = new City(40, "Residential");
     this.cityGround = new CityGround(this.city);
 
     this.cityGroundRenderPass = new RenderPass(
@@ -1010,8 +1010,8 @@ export class SkinningAnimation extends CanvasAnimation {
    * Creates a new city.
    * @param citySize The size of the new city.
    */
-  public initCity(citySize: number): void {
-    this.city = new City(citySize, "Downtown");
+  public initCity(citySize: number, cityType: string): void {
+    this.city = new City(citySize, cityType);
     this.cityGround = new CityGround(this.city);
     this.buildings = new Buildings(this.city);
     this.initCityGround();

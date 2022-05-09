@@ -206,10 +206,15 @@ export class Camera {
       );
   }
 
-  public offsetTarget(dir: Vec3): void {
+  public offsetTarget(dir: Vec3, dt: number): void {
     // TODO
     console.assert(dir != null);
-    throw new Error("offsetTarget not complete");
+    console.assert(dt != null);
+    dir.normalize();
+    dir.scale(dt);
+    const target: Vec3 = this.target();
+    target.add(dir);
+    this.setTarget(target);
   }
 
   // Translation Methods
