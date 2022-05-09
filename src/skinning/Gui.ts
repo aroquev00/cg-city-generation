@@ -377,24 +377,37 @@ export class GUI implements IGUI {
         this.camera.offset(
             this.camera.forward().negate(),
             GUI.zoomSpeed,
-            true
+            this.fps
           );
         break;
       }
       case "KeyA": {
-        this.camera.offset(this.camera.right().negate(), GUI.zoomSpeed, true);
+        if (this.fps) {
+          this.camera.offset(this.camera.right().negate(), GUI.panSpeed, true);
+        } else {
+          this.camera.offsetTarget(this.camera.right().negate(), GUI.panSpeed);
+        }
         break;
       }
       case "KeyS": {
-        this.camera.offset(this.camera.forward(), GUI.zoomSpeed, true);
+        this.camera.offset(this.camera.forward(), GUI.zoomSpeed, this.fps);
         break;
       }
       case "KeyD": {
-        this.camera.offset(this.camera.right(), GUI.zoomSpeed, true);
+        if (this.fps) {
+          this.camera.offset(this.camera.right(), GUI.panSpeed, true);
+        } else {
+          this.camera.offsetTarget(this.camera.right(), GUI.panSpeed);
+        }
         break;
       }
       case "KeyR": {
         this.animation.reset();
+        break;
+      }
+      case "KeyC": {
+        this.fps = !this.fps;
+        console.log("fps mode: " + this.fps);
         break;
       }
       case "ArrowLeft": {
@@ -416,11 +429,19 @@ export class GUI implements IGUI {
         break;
       }
       case "ArrowUp": {
-        this.camera.offset(this.camera.up(), GUI.zoomSpeed, true);
+        if (this.fps) {
+          this.camera.offset(this.camera.up(), GUI.panSpeed, true);
+        } else {
+          this.camera.offsetTarget(this.camera.up(), GUI.panSpeed);
+        }
         break;
       }
       case "ArrowDown": {
-        this.camera.offset(this.camera.up().negate(), GUI.zoomSpeed, true);
+        if (this.fps) {
+          this.camera.offset(this.camera.up().negate(), GUI.panSpeed, true);
+        } else {
+          this.camera.offsetTarget(this.camera.up().negate(), GUI.panSpeed);
+        }
         break;
       }
       case "KeyK": {
