@@ -109,7 +109,7 @@ export class SkinningAnimation extends CanvasAnimation {
     this.floor = new Floor();
     this.cylinder = new Cylinder(10);
 
-    this.city = new City(40, "Residential");
+    this.city = new City(20, "Residential");
     this.cityGround = new CityGround(this.city);
 
     this.cityGroundRenderPass = new RenderPass(
@@ -168,10 +168,10 @@ export class SkinningAnimation extends CanvasAnimation {
     this.initBuildings();
     this.scene = new CLoader("");
 
-    for(var i = 0;i < this.buildings.buildings.length; i++){
+    /*for(var i = 0;i < this.buildings.buildings.length; i++){
       this.buildings.buildings[i].renderPass = new RenderPass(this.extVAO, gl, buildingVSText, buildingFSText);
       this.initSingleBuilding(this.buildings.buildings[i]);
-    }
+    }*/
 
     // Status bar
     this.sBackRenderPass = new RenderPass(
@@ -242,22 +242,23 @@ export class SkinningAnimation extends CanvasAnimation {
     if (this.scene.meshes.length === 0) {
       return;
     }
-    //this.initModel();
-    //this.initSkeleton();
-    //this.initCylinder();
     this.gui.reset();
   }
 
   public initBuildings(){
     this.buildingRenderPass.setIndexBufferData(this.buildings.getIndices());
 
-    this.buildingRenderPass.addTextureMap("cityGeneration/windows.jpg", buildingVSText, buildingTextureFSText);
+    //this.buildingRenderPass.addTextureMap("cityGeneration/windows.jpg", buildingVSText, buildingTextureFSText);
 
-    this.buildingRenderPass.addAttribute("uv", 2, this.ctx.FLOAT, false,
-        2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getUV());
+    /*this.buildingRenderPass.addAttribute("uv", 2, this.ctx.FLOAT, false,
+        2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getUV());*/
 
     this.buildingRenderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
       3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getVertices());
+
+    console.log(this.buildings.getVertices());
+    console.log(this.buildings.getIndices());
+    console.log(this.buildings.getNormals());
     
       this.buildingRenderPass.addAttribute("normal", 3, this.ctx.FLOAT, false,
       3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getNormals());
@@ -308,6 +309,7 @@ export class SkinningAnimation extends CanvasAnimation {
     this.buildingRenderPass.setup();
   }
 
+  /* Used to add a renderpass for each individual building */
   public initSingleBuilding(b: Building) {
     b.renderPass.setIndexBufferData(b.indicesFlat);
 
@@ -369,109 +371,6 @@ export class SkinningAnimation extends CanvasAnimation {
       0
     );
     b.renderPass.setup();
-  }
-
-  public initCylinder(): void {
-    this.cylinderRenderPass.setIndexBufferData(this.cylinder.indicesFlatMap());
-
-    this.cylinderRenderPass.addAttribute(
-      "vertPosition",
-      2,
-      this.ctx.FLOAT,
-      false,
-      2 * Float32Array.BYTES_PER_ELEMENT,
-      0,
-      undefined,
-      this.cylinder.positionsFlatMap()
-    );
-
-    this.cylinderRenderPass.addUniform(
-      "mWorld",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(
-          loc,
-          false,
-          new Float32Array(new Mat4().setIdentity().all())
-        );
-      }
-    );
-    this.cylinderRenderPass.addUniform(
-      "mProj",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(
-          loc,
-          false,
-          new Float32Array(this.gui.projMatrix().all())
-        );
-      }
-    );
-    this.cylinderRenderPass.addUniform(
-      "mView",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(
-          loc,
-          false,
-          new Float32Array(this.gui.viewMatrix().all())
-        );
-      }
-    );
-
-    this.cylinderRenderPass.addUniform(
-      "initialTrans",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix3fv(
-          loc,
-          false,
-          new Float32Array(
-            this.getScene()
-              .meshes[0].bones[
-                getHighlightedBoneIndex()
-              ].initialTransformation.toMat3()
-              .all()
-          )
-        );
-      }
-    );
-
-    this.cylinderRenderPass.addUniform(
-      "bTrans",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniform3fv(
-          loc,
-          this.getScene().meshes[0].bones[getHighlightedBoneIndex()].position
-            .xyz
-        );
-      }
-    );
-
-    this.cylinderRenderPass.addUniform(
-      "bRot",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniform4fv(
-          loc,
-          this.getScene().meshes[0].bones[getHighlightedBoneIndex()].rotation
-            .xyzw
-        );
-      }
-    );
-
-    this.cylinderRenderPass.addUniform(
-      "length",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniform1f(
-          loc,
-          this.getScene().meshes[0].bones[getHighlightedBoneIndex()].length
-        );
-      }
-    );
-
-    this.cylinderRenderPass.setDrawData(
-      this.ctx.LINES,
-      this.cylinder.indicesFlatMap().length,
-      this.ctx.UNSIGNED_INT,
-      0
-    );
-    this.cylinderRenderPass.setup();
   }
 
   /**
@@ -662,84 +561,6 @@ export class SkinningAnimation extends CanvasAnimation {
       0
     );
     this.sceneRenderPass.setup();
-  }
-
-  /**
-   * Sets up the skeleton drawing
-   */
-  public initSkeleton(): void {
-    this.skeletonRenderPass.setIndexBufferData(
-      this.scene.meshes[0].getBoneIndices()
-    );
-
-    this.skeletonRenderPass.addAttribute(
-      "vertPosition",
-      3,
-      this.ctx.FLOAT,
-      false,
-      3 * Float32Array.BYTES_PER_ELEMENT,
-      0,
-      undefined,
-      this.scene.meshes[0].getBonePositions()
-    );
-
-    this.skeletonRenderPass.addAttribute(
-      "boneIndex",
-      1,
-      this.ctx.FLOAT,
-      false,
-      1 * Float32Array.BYTES_PER_ELEMENT,
-      0,
-      undefined,
-      this.scene.meshes[0].getBoneIndexAttribute()
-    );
-
-    this.skeletonRenderPass.addUniform(
-      "mWorld",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(loc, false, new Float32Array(Mat4.identity.all()));
-      }
-    );
-    this.skeletonRenderPass.addUniform(
-      "mProj",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(
-          loc,
-          false,
-          new Float32Array(this.gui.projMatrix().all())
-        );
-      }
-    );
-    this.skeletonRenderPass.addUniform(
-      "mView",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniformMatrix4fv(
-          loc,
-          false,
-          new Float32Array(this.gui.viewMatrix().all())
-        );
-      }
-    );
-    this.skeletonRenderPass.addUniform(
-      "bTrans",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniform3fv(loc, this.getScene().meshes[0].getBoneTranslations());
-      }
-    );
-    this.skeletonRenderPass.addUniform(
-      "bRots",
-      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
-        gl.uniform4fv(loc, this.getScene().meshes[0].getBoneRotations());
-      }
-    );
-
-    this.skeletonRenderPass.setDrawData(
-      this.ctx.LINES,
-      this.scene.meshes[0].getBoneIndices().length,
-      this.ctx.UNSIGNED_INT,
-      0
-    );
-    this.skeletonRenderPass.setup();
   }
 
   /**

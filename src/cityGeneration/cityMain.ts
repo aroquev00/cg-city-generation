@@ -1,4 +1,4 @@
 import { City } from "./cityGeneration.js";
 
-let city = new City(20, "Downtown");
+let city = new City(5, "Residential");
 city.printCity();

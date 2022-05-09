@@ -95,6 +95,30 @@ export const buildingVSText = `
     
     attribute vec3 vertPosition;
     attribute vec3 normal;
+
+    varying vec4 color;
+    varying vec3 norm;
+    varying float angle;
+
+    void main () {
+        norm = normalize(normal);
+        color = vec4(.8, .8, .8, 1.0);
+        vec4 lightDir = normalize(lightPosition - vec4(vertPosition, 1.0));
+        angle = max(dot(lightDir, vec4(normal, 1.0)), 0.0);
+        gl_Position = mProj * mView * mWorld * vec4(vertPosition, 1.0);
+    }
+`;
+
+export const buildingTextureVSText = `
+    precision mediump float;
+
+    uniform mat4 mWorld;
+    uniform mat4 mView;
+    uniform mat4 mProj;
+    uniform vec4 lightPosition;
+    
+    attribute vec3 vertPosition;
+    attribute vec3 normal;
     attribute vec2 uv;
 
     varying vec2 textureUV;

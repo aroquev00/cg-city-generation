@@ -15,7 +15,7 @@ export class Buildings {
         for(let i = 0; i < city.map.length; i++){
             for(let j = 0; j < city.map[0].length; j++){
                 if (city.map[i][j].type == GroundType.Block) {
-                    this.buildings.push(new Building(i, j, Math.random() * 5));
+                    this.buildings.push(new Building(i, j, Math.random() * 5, city.type));
                 }
             }
         }
@@ -276,12 +276,17 @@ export class Building {
 
     // roof type variable?
 
-    constructor(posX, posY, height) {
+    constructor(posX, posY, height, type) {
         this.posX = posX;
         this.posY = posY;
         this.height = height;
 
-        this.generateVertices();
+        if(type == "Residential"){
+            this.generateHouseVertices();
+        }
+        else if(type == "Downtown") {
+            this.generateVertices();
+        }
 
     }
 
@@ -318,14 +323,18 @@ export class Building {
         
         let rI = [...roofIndices];
         for(let i = 0;i < rI.length;i++){
-            rI[i] = rI[i] + clone.length;
+            rI[i] = rI[i] + clone.length / 3;
         }
 
         clone = clone.concat(roofClone);
 
         this.vertices = clone;
-        this.indices = [...cubeVerts].concat(rI);
+        this.indices = [...cubeIndices].concat(rI);
         this.normals = [...cubeNormals].concat([...roofNormals]);
+
+        /*console.log(this.vertices);
+        console.log(this.indices);
+        console.log(this.normals);*/
     }
 }
 
