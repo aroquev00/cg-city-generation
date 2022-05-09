@@ -8,26 +8,19 @@ import { GUI, Mode } from "./Gui.js";
 import {
   cityGroundVSText,
   cityGroundFSText,
-  sceneFSText,
-  sceneVSText,
-  sceneTextureFSText,
   floorFSText,
   floorVSText,
-  cylinderVSText,
-  cylinderFSText,
-  skeletonFSText,
-  skeletonVSText,
   sBackVSText,
   sBackFSText,
   buildingFSText,
   buildingVSText,
-  buildingTextureFSText
+  buildingTextureFSText,
+  buildingTextureVSText
 } from "./Shaders.js";
 import { Mat4, Vec4, Vec3 } from "../lib/TSM.js";
 import { CLoader } from "./AnimationFileLoader.js";
 import { RenderPass } from "../lib/webglutils/RenderPass.js";
 import { Camera } from "../lib/webglutils/Camera.js";
-import { Cylinder } from "../lib/webglutils/Cylinder.js";
 
 import { CityGround } from "../lib/webglutils/CityGround.js";
 
@@ -69,17 +62,9 @@ export class SkinningAnimation extends CanvasAnimation {
 
   /* Scene rendering info */
   private scene: CLoader;
-  private sceneRenderPass: RenderPass;
-
-  /* Skeleton rendering info */
-  private skeletonRenderPass: RenderPass;
 
   /* Scrub bar background rendering info */
   private sBackRenderPass: RenderPass;
-
-  /* Cylinder rendering info */
-  private cylinderRenderPass: RenderPass;
-  private cylinder: Cylinder;
 
   /* Building rendering info */
   private buildingRenderPass: RenderPass;
@@ -107,10 +92,10 @@ export class SkinningAnimation extends CanvasAnimation {
     let gl = this.ctx;
 
     this.floor = new Floor();
-    this.cylinder = new Cylinder(10);
 
-    this.city = new City(20, "Residential");
+    this.city = new City(20, "Downtown");
     this.cityGround = new CityGround(this.city);
+    
 
     this.cityGroundRenderPass = new RenderPass(
       this.extVAO,
@@ -118,30 +103,11 @@ export class SkinningAnimation extends CanvasAnimation {
       cityGroundVSText,
       cityGroundFSText
     );
-
     this.floorRenderPass = new RenderPass(
       this.extVAO,
       gl,
       floorVSText,
       floorFSText
-    );
-    this.sceneRenderPass = new RenderPass(
-      this.extVAO,
-      gl,
-      sceneVSText,
-      sceneFSText
-    );
-    this.skeletonRenderPass = new RenderPass(
-      this.extVAO,
-      gl,
-      skeletonVSText,
-      skeletonFSText
-    );
-    this.cylinderRenderPass = new RenderPass(
-      this.extVAO,
-      gl,
-      cylinderVSText,
-      cylinderFSText
     );
     this.buildingRenderPass = new RenderPass(
       this.extVAO,
@@ -246,10 +212,14 @@ export class SkinningAnimation extends CanvasAnimation {
   public initBuildings(){
     this.buildingRenderPass.setIndexBufferData(this.buildings.getIndices());
 
-    //this.buildingRenderPass.addTextureMap("cityGeneration/windows.jpg", buildingVSText, buildingTextureFSText);
+    // Currently only textures for skyscrapers are supported
+    if(this.city.type == "Downtown") {
+      console.log("Adding UV");
+      this.buildingRenderPass.addTextureMap("cityGeneration/windows.jpg", buildingTextureVSText, buildingTextureFSText);
 
-    /*this.buildingRenderPass.addAttribute("uv", 2, this.ctx.FLOAT, false,
-        2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getUV());*/
+      this.buildingRenderPass.addAttribute("uv", 2, this.ctx.FLOAT, false,
+          2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getUV());
+    }
 
     this.buildingRenderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
       3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, this.buildings.getVertices());
@@ -608,6 +578,12 @@ export class SkinningAnimation extends CanvasAnimation {
    */
   public initCity(citySize: number, cityType: string): void {
     this.city = new City(citySize, cityType);
+    this.buildingRenderPass = new RenderPass(
+      this.extVAO,
+      this.ctx,
+      buildingVSText,
+      buildingFSText
+    );
     this.cityGround = new CityGround(this.city);
     this.buildings = new Buildings(this.city);
     this.initCityGround();
