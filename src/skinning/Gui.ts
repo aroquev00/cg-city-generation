@@ -57,6 +57,8 @@ export class GUI implements IGUI {
   public hoverY: number = 0;
 
   private draggingBone: boolean;
+  
+  private shiftKeyActive: boolean;
 
   /**
    *
@@ -294,6 +296,8 @@ export class GUI implements IGUI {
     // TODO
     // Maybe your bone highlight/dragging logic needs to do stuff here too
     this.draggingBone = false;
+    
+    this.shiftKeyActive = false;
   }
 
   /**
@@ -303,39 +307,70 @@ export class GUI implements IGUI {
   public onKeydown(key: KeyboardEvent): void {
     switch (key.code) {
       case "Digit1": {
-        this.animation.initCity(10);
+        if (this.shiftKeyActive) {
+          // Downtown
+          this.animation.initCity(this.animation.city.size, "Downtown");
+        } else {
+          this.animation.initCity(10, this.animation.city.type);
+        }
         break;
       }
       case "Digit2": {
-        this.animation.initCity(20);
+        if (this.shiftKeyActive) {
+          // Downtown
+          this.animation.initCity(this.animation.city.size, "Residential");
+        } else {
+          this.animation.initCity(20, this.animation.city.type);
+        }
         break;
       }
       case "Digit3": {
-        this.animation.initCity(30);
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(30, this.animation.city.type);
+        }
         break;
       }      
       case "Digit4": {
-        this.animation.initCity(40);
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(40, this.animation.city.type);
+        }
         break;
       }
       case "Digit5": {
-        this.animation.initCity(50);
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(50, this.animation.city.type);
+        }
         break;
       }
       case "Digit6": {
-        this.animation.initCity(60);
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(60, this.animation.city.type);
+        }
         break;
       }
       case "Digit7": {
-        this.animation.initCity(70);
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(70, this.animation.city.type);
+        }
         break;
       }
       case "Digit8": {
-        this.animation.initCity(80);
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(80, this.animation.city.type);
+        }
         break;
       }
       case "Digit9": {
-        this.animation.initCity(90);
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(90, this.animation.city.type);
+        }
         break;
       }
       case "KeyW": {
@@ -414,8 +449,25 @@ export class GUI implements IGUI {
         }
         break;
       }
+      case "ShiftLeft": {
+      }
+      case "ShiftRight": {
+        this.shiftKeyActive = true;
+        break;
+      }
       default: {
         console.log("Key : '", key.code, "' was pressed.");
+        break;
+      }
+    }
+  }
+
+  private onKeyup(key: KeyboardEvent): void {
+    switch(key.code) {
+      case "ShiftLeft": {
+      }
+      case "ShiftRight": {
+        this.shiftKeyActive = false;
         break;
       }
     }
@@ -429,6 +481,10 @@ export class GUI implements IGUI {
     /* Event listener for key controls */
     window.addEventListener("keydown", (key: KeyboardEvent) =>
       this.onKeydown(key)
+    );
+
+    window.addEventListener("keyup", (key: KeyboardEvent) => 
+      this.onKeyup(key)
     );
 
     /* Event listener for mouse controls */
