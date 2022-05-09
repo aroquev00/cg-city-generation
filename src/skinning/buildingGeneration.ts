@@ -1,10 +1,10 @@
 import { GroundType } from "../cityGeneration/cityEnums.js";
 import { City } from "../cityGeneration/cityGeneration.js";
-import { Mat4 } from "../lib/TSM.js";
 import { RenderPass } from "../lib/webglutils/RenderPass.js";
 
 const CELL_SIZE = 1;
 
+// Holds all geometry for buildings
 export class Buildings {
 
     buildings: Building[];
@@ -62,11 +62,6 @@ export class Buildings {
     }
 }
 
-
-// Generates string/vertices from L-System
-class BuildingBuilder {
-
-}
 
 const cubeVerts = [
     // Front face
@@ -331,23 +326,5 @@ export class Building {
         this.vertices = clone;
         this.indices = [...cubeIndices].concat(rI);
         this.normals = [...cubeNormals].concat([...roofNormals]);
-
-        /*console.log(this.vertices);
-        console.log(this.indices);
-        console.log(this.normals);*/
     }
 }
-
-/*
-
-Generate floors, windows from L-system?
-Ending is top of building
-L-system to do transforms to rectangle
-change width, length on floors
-
-L system to perform arbitrary transformations
-Ex: do a push on each side, etc...
-
-Join buildings?
-
-*/
