@@ -32,7 +32,7 @@ import { Cylinder } from "../lib/webglutils/Cylinder.js";
 import { CityGround } from "../lib/webglutils/CityGround.js";
 
 import { Keyframe, interpolateSkeleton } from "./Utils.js";
-import { Buildings } from "./buildingGeneration.js";
+import { Building, Buildings } from "./buildingGeneration.js";
 import { City } from "../cityGeneration/cityGeneration.js";
 
 export const debug = false;
@@ -168,6 +168,11 @@ export class SkinningAnimation extends CanvasAnimation {
     this.initBuildings();
     this.scene = new CLoader("");
 
+    for(var i = 0;i < this.buildings.buildings.length; i++){
+      this.buildings.buildings[i].renderPass = new RenderPass(this.extVAO, gl, buildingVSText, buildingFSText);
+      this.initSingleBuilding(this.buildings.buildings[i]);
+    }
+
     // Status bar
     this.sBackRenderPass = new RenderPass(
       this.extVAO,
@@ -301,6 +306,69 @@ export class SkinningAnimation extends CanvasAnimation {
       0
     );
     this.buildingRenderPass.setup();
+  }
+
+  public initSingleBuilding(b: Building) {
+    b.renderPass.setIndexBufferData(b.indicesFlat);
+
+    var textures = ["cityGeneration/windows.jpg","cityGeneration/windows2.jpeg","cityGeneration/windows3.jpeg"]
+    var textureFile = textures[Math.floor(Math.random()*3)];
+
+    b.renderPass.addTextureMap(textureFile, buildingVSText, buildingTextureFSText);
+
+    b.renderPass.addAttribute("uv", 2, this.ctx.FLOAT, false,
+        2 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, b.uvFlat);
+
+    b.renderPass.addAttribute("vertPosition", 3, this.ctx.FLOAT, false,
+      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, b.verticesFlat);
+    
+    b.renderPass.addAttribute("normal", 3, this.ctx.FLOAT, false,
+      3 * Float32Array.BYTES_PER_ELEMENT, 0, undefined, b.normalsFlat);
+
+    b.renderPass.addUniform(
+      "mWorld",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(new Mat4().setIdentity().all())
+        );
+      }
+    );
+    b.renderPass.addUniform(
+      "mProj",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.projMatrix().all())
+        );
+      }
+    );
+    b.renderPass.addUniform(
+      "mView",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniformMatrix4fv(
+          loc,
+          false,
+          new Float32Array(this.gui.viewMatrix().all())
+        );
+      }
+    );
+    b.renderPass.addUniform(
+      "lightPosition",
+      (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => {
+        gl.uniform4fv(loc, this.lightPosition.xyzw);
+      }
+    );
+
+    b.renderPass.setDrawData(
+      this.ctx.TRIANGLES,
+      b.indices.length,
+      this.ctx.UNSIGNED_INT,
+      0
+    );
+    b.renderPass.setup();
   }
 
   public initCylinder(): void {
@@ -915,6 +983,9 @@ export class SkinningAnimation extends CanvasAnimation {
     this.cityGroundRenderPass.draw();
 
     this.buildingRenderPass.draw();
+    /*for(var i = 0;i < this.buildings.buildings.length; i++){
+      this.buildings.buildings[i].renderPass.draw();
+    }*/
 
     /* Draw Scene */
     /*if (this.scene.meshes.length > 0) {

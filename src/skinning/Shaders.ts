@@ -120,6 +120,7 @@ export const buildingFSText = `
 
     void main() {
         gl_FragColor = color * angle;
+        gl_FragColor.w = 1.0;
     }
 `;
 
