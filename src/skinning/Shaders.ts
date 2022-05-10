@@ -1,3 +1,44 @@
+export const cityGroundVSText = `
+    precision mediump float;
+
+    uniform vec4 uLightPos;
+    uniform mat4 uWorld;
+    uniform mat4 uView;
+    uniform mat4 uProj;
+
+    attribute vec4 aVertPos;
+    attribute vec2 aUV;
+
+    varying vec4 vClipPos;
+    varying vec2 uv;
+
+    void main () {
+
+        gl_Position = uProj * uView * uWorld * aVertPos;
+        vClipPos = gl_Position;
+
+        uv = aUV;
+    }
+`;
+
+export const cityGroundFSText = `
+    precision mediump float;
+
+    uniform mat4 uViewInv;
+    uniform mat4 uProjInv;
+    uniform vec4 uLightPos;
+
+    varying vec4 vClipPos;
+    varying vec2 uv;
+
+    uniform sampler2D u_texture;
+
+    void main() {
+        gl_FragColor = texture2D(u_texture, uv);
+        //gl_FragColor = vec4(0.0, .6, .2, 1.0);
+    }
+`;
+
 export const floorVSText = `
     precision mediump float;
 
@@ -37,10 +78,93 @@ export const floorFSText = `
 
         /* Compute light fall off */
         vec4 lightDirection = uLightPos - wsPos;
-        float dot_nl = dot(normalize(lightDirection), vec4(0.0, 1.0, 0.0, 0.0));
+        float dot_nl = max(dot(normalize(lightDirection), vec4(0.0, 1.0, 0.0, 0.0)), 0.0);
 	    dot_nl = clamp(dot_nl, 0.0, 1.0);
 	
         gl_FragColor = vec4(clamp(dot_nl * color, 0.0, 1.0), 1.0);
+    }
+`;
+
+export const buildingVSText = `
+    precision mediump float;
+
+    uniform mat4 mWorld;
+    uniform mat4 mView;
+    uniform mat4 mProj;
+    uniform vec4 lightPosition;
+    
+    attribute vec3 vertPosition;
+    attribute vec3 normal;
+
+    varying vec4 color;
+    varying vec3 norm;
+    varying float angle;
+
+    void main () {
+        norm = normalize(normal);
+        color = vec4(.8, .8, .8, 1.0);
+        vec4 lightDir = normalize(lightPosition - vec4(vertPosition, 1.0));
+        angle = max(dot(lightDir, vec4(normal, 1.0)), 0.0);
+        gl_Position = mProj * mView * mWorld * vec4(vertPosition, 1.0);
+    }
+`;
+
+export const buildingTextureVSText = `
+    precision mediump float;
+
+    uniform mat4 mWorld;
+    uniform mat4 mView;
+    uniform mat4 mProj;
+    uniform vec4 lightPosition;
+    
+    attribute vec3 vertPosition;
+    attribute vec3 normal;
+    attribute vec2 uv;
+
+    varying vec2 textureUV;
+    varying vec4 color;
+    varying vec3 norm;
+    varying float angle;
+
+    void main () {
+        textureUV = uv;
+        norm = normal;
+        color = vec4(.8, .8, .8, 1.0);
+        vec4 lightDir = normalize(lightPosition - vec4(vertPosition, 1.0));
+        angle = max(dot(lightDir, vec4(normal, 1.0)), 0.0);
+        gl_Position = mProj * mView * mWorld * vec4(vertPosition, 1.0);
+    }
+`;
+
+export const buildingFSText = `
+    precision mediump float;
+
+    varying vec4 color;
+    varying float angle;
+
+    void main() {
+        gl_FragColor = color * angle;
+        gl_FragColor.w = 1.0;
+    }
+`;
+
+export const buildingTextureFSText = `
+    precision mediump float;
+
+    varying vec4 color;
+    varying vec2 textureUV;
+    varying vec3 norm;
+    varying float angle;
+
+    uniform sampler2D u_texture;
+
+    void main() {
+        if(norm.y == 1.0 || norm.y == -1.0) {
+            gl_FragColor = color * angle;
+        } else {
+            gl_FragColor = angle * texture2D(u_texture, textureUV);
+        }
+        gl_FragColor.w = 1.0;
     }
 `;
 
@@ -104,99 +228,6 @@ export const sceneVSText = `
 
     }
 
-`;
-
-export const sceneFSText = `
-    precision mediump float;
-
-    varying vec4 lightDir;
-    varying vec2 uv;
-    varying vec4 normal;
-
-    void main () {
-        gl_FragColor = vec4((normal.x + 1.0)/2.0, (normal.y + 1.0)/2.0, (normal.z + 1.0)/2.0,1.0);
-    }
-`;
-
-export const sceneTextureFSText = `
-    precision mediump float;
-
-    varying vec4 lightDir;
-    varying vec2 uv;
-    varying vec4 normal;
-
-    uniform sampler2D u_texture;
-
-    void main () {
-        gl_FragColor = texture2D(u_texture, uv);
-        //gl_FragColor = vec4((normal.x + 1.0)/2.0, (normal.y + 1.0)/2.0, (normal.z + 1.0)/2.0,1.0);
-    }
-`;
-
-export const cylinderVSText = `
-    precision mediump float;
-
-    attribute vec2 vertPosition;
-
-    uniform mat4 mWorld;
-    uniform mat4 mView;
-    uniform mat4 mProj;
-
-    uniform mat3 initialTrans;
-
-    uniform vec3 bTrans;
-    uniform vec4 bRot;
-    uniform float length;
-    
-    vec3 qtrans(vec4 q, vec3 v) {
-        return v + 2.0 * cross(cross(v, q.xyz) - q.w*v, q.xyz);
-    }
-
-    void main () {
-        float PI = 3.14159265359;
-        float radians = vertPosition.x * 2.0 * PI;
-        vec3 worldPoint = initialTrans * vec3(cos(radians) / 15.0, vertPosition.y * length, sin(radians) / 15.0);
-        gl_Position = mProj * mView * mWorld * vec4(bTrans + qtrans(bRot, worldPoint), 1.0);
-    }
-`;
-
-export const cylinderFSText = `
-    precision mediump float;
-
-    void main () {
-        gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-    }
-`;
-
-export const skeletonVSText = `
-    precision mediump float;
-
-    attribute vec3 vertPosition;
-    attribute float boneIndex;
-    
-    uniform mat4 mWorld;
-    uniform mat4 mView;
-    uniform mat4 mProj;
-
-    uniform vec3 bTrans[64];
-    uniform vec4 bRots[64];
-
-    vec3 qtrans(vec4 q, vec3 v) {
-        return v + 2.0 * cross(cross(v, q.xyz) - q.w*v, q.xyz);
-    }
-
-    void main () {
-        int index = int(boneIndex);
-        gl_Position = mProj * mView * mWorld * vec4(bTrans[index] + qtrans(bRots[index], vertPosition), 1.0);
-    }
-`;
-
-export const skeletonFSText = `
-    precision mediump float;
-
-    void main () {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }
 `;
 
 export const sBackVSText = `

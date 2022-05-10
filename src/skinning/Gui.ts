@@ -57,6 +57,8 @@ export class GUI implements IGUI {
   public hoverY: number = 0;
 
   private draggingBone: boolean;
+  
+  private shiftKeyActive: boolean;
 
   /**
    *
@@ -95,14 +97,17 @@ export class GUI implements IGUI {
    * Resets the state of the GUI
    */
   public reset(): void {
+    const cameraPosX = this.animation.city.size / 2;
+    const cameraHeight = this.animation.city.size;
+
     this.fps = false;
     this.dragging = false;
     this.time = 0;
     this.mode = Mode.edit;
     this.camera = new Camera(
-      new Vec3([0, 0, -6]),
-      new Vec3([0, 0, 0]),
-      new Vec3([0, 1, 0]),
+      new Vec3([cameraPosX, cameraHeight, cameraPosX]),
+      new Vec3([cameraPosX, 0, cameraPosX]),
+      new Vec3([0, 0, 1]),
       45,
       this.width / this.viewPortHeight,
       0.1,
@@ -152,11 +157,12 @@ export class GUI implements IGUI {
     
     // TODO
     // Some logic to rotate the bones, instead of moving the camera, if there is a currently highlighted bone
-    if (this.checkIfMouseIntersectsBone(mouse.offsetX, mouse.offsetY)) {
+    /*if (this.checkIfMouseIntersectsBone(mouse.offsetX, mouse.offsetY)) {
       this.draggingBone = true;
     } else {
       this.dragging = true;
-    }
+    }*/
+    this.dragging = true;
     this.prevX = mouse.screenX;
     this.prevY = mouse.screenY;
 
@@ -224,7 +230,7 @@ export class GUI implements IGUI {
     // You will want logic here:
     // 1) To highlight a bone, if the mouse is hovering over a bone;
     // 2) To rotate a bone, if the mouse button is pressed and currently highlighting a bone.
-    if (this.draggingBone) {
+    /*if (this.draggingBone) {
       // Work on rotating the bone.
       let inverse = new Mat4();
       this.camera.projMatrix().multiply(this.camera.viewMatrix(), inverse);
@@ -253,7 +259,7 @@ export class GUI implements IGUI {
     } else {
       // Just highlight bone
       this.checkIfMouseIntersectsBone(mouse.offsetX, mouse.offsetY);
-    }
+    }*/
   }
 
   private checkIfMouseIntersectsBone(mouseX: number, mouseY: number) {
@@ -290,6 +296,8 @@ export class GUI implements IGUI {
     // TODO
     // Maybe your bone highlight/dragging logic needs to do stuff here too
     this.draggingBone = false;
+    
+    this.shiftKeyActive = false;
   }
 
   /**
@@ -299,55 +307,107 @@ export class GUI implements IGUI {
   public onKeydown(key: KeyboardEvent): void {
     switch (key.code) {
       case "Digit1": {
-        this.animation.setScene("/static/assets/skinning/split_cube.dae");
+        if (this.shiftKeyActive) {
+          // Downtown
+          this.animation.initCity(this.animation.city.size, "Downtown");
+        } else {
+          this.animation.initCity(10, this.animation.city.type);
+        }
         break;
       }
       case "Digit2": {
-        this.animation.setScene("/static/assets/skinning/long_cubes.dae");
+        if (this.shiftKeyActive) {
+          // Downtown
+          this.animation.initCity(this.animation.city.size, "Residential");
+        } else {
+          this.animation.initCity(20, this.animation.city.type);
+        }
         break;
       }
       case "Digit3": {
-        this.animation.setScene("/static/assets/skinning/simple_art.dae");
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(30, this.animation.city.type);
+        }
         break;
       }      
       case "Digit4": {
-        this.animation.setScene("/static/assets/skinning/mapped_cube.dae");
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(40, this.animation.city.type);
+        }
         break;
       }
       case "Digit5": {
-        this.animation.setScene("/static/assets/skinning/robot.dae");
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(50, this.animation.city.type);
+        }
         break;
       }
       case "Digit6": {
-        this.animation.setScene("/static/assets/skinning/head.dae");
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(60, this.animation.city.type);
+        }
         break;
       }
       case "Digit7": {
-        this.animation.setScene("/static/assets/skinning/wolf.dae");
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(70, this.animation.city.type);
+        }
+        break;
+      }
+      case "Digit8": {
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(80, this.animation.city.type);
+        }
+        break;
+      }
+      case "Digit9": {
+        if (this.shiftKeyActive) {
+        } else {
+          this.animation.initCity(90, this.animation.city.type);
+        }
         break;
       }
       case "KeyW": {
         this.camera.offset(
             this.camera.forward().negate(),
             GUI.zoomSpeed,
-            true
+            this.fps
           );
         break;
       }
       case "KeyA": {
-        this.camera.offset(this.camera.right().negate(), GUI.zoomSpeed, true);
+        if (this.fps) {
+          this.camera.offset(this.camera.right().negate(), GUI.panSpeed, true);
+        } else {
+          this.camera.offsetTarget(this.camera.right().negate(), GUI.panSpeed);
+        }
         break;
       }
       case "KeyS": {
-        this.camera.offset(this.camera.forward(), GUI.zoomSpeed, true);
+        this.camera.offset(this.camera.forward(), GUI.zoomSpeed, this.fps);
         break;
       }
       case "KeyD": {
-        this.camera.offset(this.camera.right(), GUI.zoomSpeed, true);
+        if (this.fps) {
+          this.camera.offset(this.camera.right(), GUI.panSpeed, true);
+        } else {
+          this.camera.offsetTarget(this.camera.right(), GUI.panSpeed);
+        }
         break;
       }
       case "KeyR": {
         this.animation.reset();
+        break;
+      }
+      case "KeyC": {
+        this.fps = !this.fps;
+        console.log("fps mode: " + this.fps);
         break;
       }
       case "ArrowLeft": {
@@ -369,11 +429,19 @@ export class GUI implements IGUI {
         break;
       }
       case "ArrowUp": {
-        this.camera.offset(this.camera.up(), GUI.zoomSpeed, true);
+        if (this.fps) {
+          this.camera.offset(this.camera.up(), GUI.panSpeed, true);
+        } else {
+          this.camera.offsetTarget(this.camera.up(), GUI.panSpeed);
+        }
         break;
       }
       case "ArrowDown": {
-        this.camera.offset(this.camera.up().negate(), GUI.zoomSpeed, true);
+        if (this.fps) {
+          this.camera.offset(this.camera.up().negate(), GUI.panSpeed, true);
+        } else {
+          this.camera.offsetTarget(this.camera.up().negate(), GUI.panSpeed);
+        }
         break;
       }
       case "KeyK": {
@@ -402,8 +470,25 @@ export class GUI implements IGUI {
         }
         break;
       }
+      case "ShiftLeft": {
+      }
+      case "ShiftRight": {
+        this.shiftKeyActive = true;
+        break;
+      }
       default: {
         console.log("Key : '", key.code, "' was pressed.");
+        break;
+      }
+    }
+  }
+
+  private onKeyup(key: KeyboardEvent): void {
+    switch(key.code) {
+      case "ShiftLeft": {
+      }
+      case "ShiftRight": {
+        this.shiftKeyActive = false;
         break;
       }
     }
@@ -417,6 +502,10 @@ export class GUI implements IGUI {
     /* Event listener for key controls */
     window.addEventListener("keydown", (key: KeyboardEvent) =>
       this.onKeydown(key)
+    );
+
+    window.addEventListener("keyup", (key: KeyboardEvent) => 
+      this.onKeyup(key)
     );
 
     /* Event listener for mouse controls */
